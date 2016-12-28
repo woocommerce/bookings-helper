@@ -326,7 +326,7 @@ if ( ! class_exists( 'Bookings_Helper' ) ) {
 				}
 
 				// Product metas.
-				$product_meta = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$wpdb->postmeta} WHERE post_id = %d AND ( meta_key LIKE '%%wc_booking%%' OR meta_key = '_resource_base_costs' OR meta_key = '_resource_block_costs' OR meta_key = '_wc_display_cost' )", $product_id ), ARRAY_A );
+				$product_meta = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$wpdb->postmeta} WHERE post_id = %d AND ( meta_key LIKE '%%wc_booking%%' OR meta_key = '_resource_base_costs' OR meta_key = '_resource_block_costs' OR meta_key = '_wc_display_cost' OR meta_key = '_virtual' )", $product_id ), ARRAY_A );
 
 				if ( empty( $product_meta ) ) {
 					throw new Exception( 'This booking product does not exist!' );
