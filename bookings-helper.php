@@ -310,9 +310,10 @@ if ( ! class_exists( 'Bookings_Helper' ) ) {
 		 */
 		public function export_product() {
 			try {
-				$product_id = isset( $_POST['product_id'] ) ? absint( $_POST['product_id'] ) : '';
-
-				if ( empty( $product_id ) || empty( get_post_status( $product_id ) ) ) {
+				$product_id     = isset( $_POST['product_id'] ) ? absint( $_POST['product_id'] ) : '';
+				$product_status = get_post_status( $product_id );
+				
+				if ( empty( $product_id ) || empty( $product_status ) ) {
 					throw new Exception( 'This booking product does not exist!' );
 				}
 
