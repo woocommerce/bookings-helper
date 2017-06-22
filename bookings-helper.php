@@ -450,8 +450,8 @@ if ( ! class_exists( 'Bookings_Helper' ) ) {
 							$wpdb->query( $wpdb->prepare( "INSERT INTO {$wpdb->postmeta} ( post_id, meta_key, meta_value ) VALUES ( %d, %s, %s )", $resource_id, sanitize_text_field( $meta['meta_key'] ), sanitize_text_field( $meta['meta_value'] ) ) );		
 						}
 
-						$new_resource_base_costs[ $resource_id ]  = array_values( $resource_base_costs )[ $i ];
-						$new_resource_block_costs[ $resource_id ] = array_values( $resource_block_costs )[ $i ];
+						$new_resource_base_costs[ $resource_id ]  = array_values( $resource_base_costs[ $i ] );
+						$new_resource_block_costs[ $resource_id ] = array_values( $resource_block_costs[ $i ] );
 
 						$wpdb->query( $wpdb->prepare( "INSERT INTO {$wpdb->prefix}wc_booking_relationships ( product_id, resource_id ) VALUES ( %d, %d )", $product_id, $resource_id ) );
 
