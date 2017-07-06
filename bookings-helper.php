@@ -322,6 +322,10 @@ if ( ! class_exists( 'Bookings_Helper' ) ) {
 				// Products.
 				$product = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$wpdb->posts} WHERE post_type = 'product' AND ID = %d", $product_id ), ARRAY_A );
 
+				// get the type of the product, accomm or booking
+				$product_type       = wp_get_post_terms( $product[0]['ID'], 'product_type' );
+				$product[0]['type'] = $product_type[0]->name;
+
 				if ( empty( $product ) ) {
 					throw new Exception( 'This booking product does not exist!' );
 				}
@@ -407,9 +411,10 @@ if ( ! class_exists( 'Bookings_Helper' ) ) {
 
 				// Product.
 				$product_data = array( 
-					'post_title'  => sanitize_text_field( $product['product']['post_title'] ) . ' (bookings test #' . absint( $product['product']['ID'] ) . ')',
-					'post_type'   => 'product',
-					'post_status' => 'publish',
+					'post_title'   => sanitize_text_field( $product['product']['post_title'] ) . ' (bookings test #' . absint( $product['product']['ID'] ) . ')',
+					'post_content' => sanitize_text_field( $product['product']['post_content'] ),
+					'post_type'    => 'product',
+					'post_status'  => 'publish',
 				);
 
 				$product_id = wp_insert_post( $product_data, false );
@@ -423,7 +428,7 @@ if ( ! class_exists( 'Bookings_Helper' ) ) {
 					$wpdb->query( $wpdb->prepare( "INSERT INTO {$wpdb->postmeta} ( post_id, meta_key, meta_value ) VALUES ( %d, %s, %s )", $product_id, sanitize_text_field( $meta['meta_key'] ), sanitize_text_field( $meta['meta_value'] ) ) );
 				}
 
-				wp_set_object_terms( $product_id, 'booking', 'product_type' );
+				wp_set_object_terms( $product_id, $product['product']['type'], 'product_type' );
 
 				// Resources.
 				if ( ! empty( $product['resources'] ) ) {

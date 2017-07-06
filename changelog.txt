@@ -2,6 +2,8 @@
 
 2017-xx-xx - version 1.0.1
 * Fix   - Syntax error preventing activation
+* Tweak - Include post_content on import
+* Tweak - Add Accommodations compatibility
 
 2016-12-12 - version 1.0.0
 * Initial creation
