@@ -322,7 +322,7 @@ if ( ! class_exists( 'Bookings_Helper' ) ) {
 				// Products.
 				$product = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$wpdb->posts} WHERE post_type = 'product' AND ID = %d", $product_id ), ARRAY_A );
 
-				// get the type of the product, accomm or booking
+				// Get the type of the product, accomm or booking.
 				$product_type       = wp_get_post_terms( $product[0]['ID'], 'product_type' );
 				$product[0]['type'] = $product_type[0]->name;
 
