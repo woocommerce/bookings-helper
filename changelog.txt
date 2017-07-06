@@ -2,6 +2,7 @@
 
 2017-xx-xx - version 1.0.1
 * Fix   - Syntax error preventing activation
+* Fix   - Resource costs not being imported
 * Tweak - Include post_content on import
 * Tweak - Add Accommodations compatibility
 

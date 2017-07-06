@@ -428,7 +428,8 @@ if ( ! class_exists( 'Bookings_Helper' ) ) {
 					$wpdb->query( $wpdb->prepare( "INSERT INTO {$wpdb->postmeta} ( post_id, meta_key, meta_value ) VALUES ( %d, %s, %s )", $product_id, sanitize_text_field( $meta['meta_key'] ), sanitize_text_field( $meta['meta_value'] ) ) );
 				}
 
-				wp_set_object_terms( $product_id, $product['product']['type'], 'product_type' );
+				$product_type = ! empty( $product['product']['type'] ) ? $product['product']['type'] : 'booking';
+				wp_set_object_terms( $product_id, $product_type, 'product_type' );
 
 				// Resources.
 				if ( ! empty( $product['resources'] ) ) {
@@ -455,8 +456,8 @@ if ( ! class_exists( 'Bookings_Helper' ) ) {
 							$wpdb->query( $wpdb->prepare( "INSERT INTO {$wpdb->postmeta} ( post_id, meta_key, meta_value ) VALUES ( %d, %s, %s )", $resource_id, sanitize_text_field( $meta['meta_key'] ), sanitize_text_field( $meta['meta_value'] ) ) );		
 						}
 
-						$new_resource_base_costs[ $resource_id ]  = array_values( $resource_base_costs[ $i ] );
-						$new_resource_block_costs[ $resource_id ] = array_values( $resource_block_costs[ $i ] );
+						$new_resource_base_costs[ $resource_id ]  = $resource_base_costs[ $resource['resource']['ID'] ];
+						$new_resource_block_costs[ $resource_id ] = $resource_block_costs[ $resource['resource']['ID'] ];
 
 						$wpdb->query( $wpdb->prepare( "INSERT INTO {$wpdb->prefix}wc_booking_relationships ( product_id, resource_id ) VALUES ( %d, %d )", $product_id, $resource_id ) );
 
