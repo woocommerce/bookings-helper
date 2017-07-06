@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name: Bookings Helper
- * Version: 1.0.0
+ * Version: 1.0.1
  * Plugin URI: https://github.com/woocommerce/bookings-helper
  * Description: This extension is a WooCommerce Bookings helper which helps you to troubleshoot bookings setup easier by allowing you to quickly export/import product settings.
  * Author: WooCommerce
@@ -306,7 +306,7 @@ if ( ! class_exists( 'Bookings_Helper' ) ) {
 		 * Exports a specific product by ID.
 		 *
 		 * @since 1.0.0
-		 * @version 1.0.0
+		 * @version 1.0.1
 		 */
 		public function export_product() {
 			try {
@@ -387,7 +387,7 @@ if ( ! class_exists( 'Bookings_Helper' ) ) {
 		 * Imports booking product from file.
 		 *
 		 * @since 1.0.0
-		 * @version 1.0.0
+		 * @version 1.0.1
 		 */
 		public function import_product() {
 			try {
@@ -437,7 +437,6 @@ if ( ! class_exists( 'Bookings_Helper' ) ) {
 					$new_resource_base_costs  = array();
 					$resource_block_costs     = get_post_meta( $product_id, '_resource_block_costs', true );
 					$new_resource_block_costs = array();
-					$i                        = 0;
 
 					foreach ( $product['resources'] as $resource ) {
 						$resource_data = array( 
@@ -460,8 +459,6 @@ if ( ! class_exists( 'Bookings_Helper' ) ) {
 						$new_resource_block_costs[ $resource_id ] = $resource_block_costs[ $resource['resource']['ID'] ];
 
 						$wpdb->query( $wpdb->prepare( "INSERT INTO {$wpdb->prefix}wc_booking_relationships ( product_id, resource_id ) VALUES ( %d, %d )", $product_id, $resource_id ) );
-
-						$i++;
 					}
 
 					if ( ! empty( $new_resource_base_costs ) ) {
