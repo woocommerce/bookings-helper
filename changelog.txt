@@ -1,6 +1,6 @@
 *** Bookings Helper Changelog ***
 
-2017-xx-xx - version 1.0.1
+2017-07-06 - version 1.0.1
 * Fix   - Syntax error preventing activation on some systems
 * Tweak - Include post_content on import
 * Tweak - Add Accommodations compatibility
