@@ -1,0 +1,7 @@
+*** Bookings Helper Changelog ***
+
+2017-xx-xx - version 1.0.1
+* Fix   - Syntax error preventing activation
+
+2016-12-12 - version 1.0.0
+* Initial creation
