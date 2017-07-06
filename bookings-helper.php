@@ -69,15 +69,13 @@ if ( ! class_exists( 'Bookings_Helper' ) ) {
 			if ( ! empty( $this->notice ) ) {
 				echo $this->notice;
 			}
+			$action_url = add_query_arg( array( 'page' => 'bookings-helper' ), admin_url( 'tools.php' ) );
 			?>
 			<div class="wrap">
 				<h1>Bookings Helper</h1>
 				<hr />
 				<div>
 					<h3>Global Availability Rules</h3>
-					<?php
-					$action_url = add_query_arg( array( 'page' => 'bookings-helper' ), admin_url( 'tools.php' ) );
-					?>
 					<form action="<?php echo $action_url; ?>" method="post" style="margin-bottom:20px;border:1px solid #ccc;padding:5px;">
 						<table>
 							<tr>
@@ -90,9 +88,6 @@ if ( ! class_exists( 'Bookings_Helper' ) ) {
 						</table>
 					</form>
 
-					<?php
-					$action_url = add_query_arg( array( 'page' => 'bookings-helper' ), admin_url( 'tools.php' ) );
-					?>
 					<form enctype="multipart/form-data" action="<?php echo $action_url; ?>" method="post" style="margin-bottom:20px;border:1px solid #ccc;padding:5px;">
 						<table>
 							<tr>
@@ -112,9 +107,6 @@ if ( ! class_exists( 'Bookings_Helper' ) ) {
 					</form>
 
 					<h3>Booking Products</h3>
-					<?php
-					$action_url = add_query_arg( array( 'page' => 'bookings-helper' ), admin_url( 'tools.php' ) );
-					?>
 					<form action="<?php echo $action_url; ?>" method="post" style="margin-bottom:20px;border:1px solid #ccc;padding:5px;">
 						<table>
 							<tr>
@@ -128,9 +120,6 @@ if ( ! class_exists( 'Bookings_Helper' ) ) {
 						</table>
 					</form>
 
-					<?php
-					$action_url = add_query_arg( array( 'page' => 'bookings-helper' ), admin_url( 'tools.php' ) );
-					?>
 					<form enctype="multipart/form-data" action="<?php echo $action_url; ?>" method="post" style="margin-bottom:20px;border:1px solid #ccc;padding:5px;">
 						<table>
 							<tr>
@@ -147,7 +136,22 @@ if ( ! class_exists( 'Bookings_Helper' ) ) {
 								</td>
 							</tr>
 						</table>
-					</form>	
+					</form>
+
+					<h3>Resources Relationships Clean Up</h3>
+					<p>Bookings 1.10 beta had a bug that created extra entries relating products and resources, this will clean up the extra entries.</p>
+					<p><strong>It is recommended you do a database backup before running this.</strong>
+					<form action="<?php echo $action_url; ?>" method="post" style="margin-bottom:20px;border:1px solid #ccc;padding:5px;">
+						<table>
+							<tr>
+								<td>
+									<input type="submit" class="button" value="Clean Up" /> <label>Removes extra database entries for product resource relationships.</label>
+									<input type="hidden" name="action" value="clean_up" />
+									<?php wp_nonce_field( 'clean_up' ); ?>
+								</td>
+							</tr>
+						</table>
+					</form>
 				</div>
 			</div>
 			<?php
@@ -172,7 +176,8 @@ if ( ! class_exists( 'Bookings_Helper' ) ) {
 				'export_globals' !== $_POST['action'] &&
 				'import_globals' !== $_POST['action'] &&
 				'export_product' !== $_POST['action'] &&
-				'import_product' !== $_POST['action']
+				'import_product' !== $_POST['action'] &&
+				'clean_up'       !== $_POST['action']
 			) {
 				return;
 			}
@@ -181,7 +186,8 @@ if ( ! class_exists( 'Bookings_Helper' ) ) {
 				! wp_verify_nonce( $_POST['_wpnonce'], 'export_globals' ) &&
 				! wp_verify_nonce( $_POST['_wpnonce'], 'import_globals' ) &&
 				! wp_verify_nonce( $_POST['_wpnonce'], 'export_product' ) &&
-				! wp_verify_nonce( $_POST['_wpnonce'], 'import_product' )
+				! wp_verify_nonce( $_POST['_wpnonce'], 'import_product' ) &&
+				! wp_verify_nonce( $_POST['_wpnonce'], 'clean_up' )
 			) {
 				wp_die( 'Cheatin&#8217; huh?' );
 			}
@@ -201,6 +207,10 @@ if ( ! class_exists( 'Bookings_Helper' ) ) {
 				
 				case 'import_product':
 					$this->import_product();
+					break;
+
+				case 'clean_up':
+					$this->clean_up();
 					break;
 			}
 		}
@@ -501,6 +511,83 @@ if ( ! class_exists( 'Bookings_Helper' ) ) {
 
 				return;
 			}
+		}
+
+		/**
+		 * Removes duplicate/extra entries in _wc_booking_relationships table created by bug in 1.10 beta
+		 *
+		 * @since 1.0.1
+		 * @version 1.0.1
+		 */
+		public function clean_up() {
+
+			global $wpdb;
+
+			// query all products that have resources, both with 'yes' or the 2.7 bool '1'
+			$args = array(
+				'post_type'      => 'product',
+				'posts_per_page' => '-1',
+				'meta_query'     => array(
+					'relation' => 'OR',
+					array(
+						'key'   => '_wc_booking_has_resources',
+						'value' => '1',
+						),
+					array(
+						'key'   => '_wc_booking_has_resources',
+						'value' => 'yes',
+						),
+					),
+				);
+			$products = get_posts( $args );
+
+			if ( empty( $products ) || 0 >= count( $products ) ) {
+				throw new Exception( 'No products with resources found.' );
+			}
+
+			/**
+			 * Go through each product and get its resources
+			 * Create a new array of resources and enter those into the database
+			 * Then use the old array to remove all previous resources
+			 */
+			foreach ( $products as $product ) {
+
+				$resources = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}wc_booking_relationships WHERE product_id = %d ORDER BY sort_order ASC", $product->ID ), ARRAY_A );
+
+				if ( empty( $resources ) || 0 >= count( $resources ) ) {
+					continue;
+				}
+
+				$cleaned_resources = array();
+				foreach ( $resources as $resource ) {
+
+					$cleaned_resources[ $resource['resource_id'] ] = $resource;
+				}
+
+				foreach ( $cleaned_resources as $resource ) {
+
+					$wpdb->insert(
+						"{$wpdb->prefix}wc_booking_relationships",
+						array(
+							'product_id'  => $resource['product_id'],
+							'resource_id' => $resource['resource_id'],
+							'sort_order'  => $resource['sort_order'],
+						)
+					);
+				}
+
+				foreach ( $resources as $resource ) {
+
+					$wpdb->delete(
+						"{$wpdb->prefix}wc_booking_relationships",
+						array(
+							'ID' => $resource['ID'],
+						)
+					);
+				}
+			}
+
+			$this->print_notice( 'Booking resource relationships cleaned up successfully!', 'success' );
 		}
 
 		/**
