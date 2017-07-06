@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name: Bookings Helper
- * Version: 1.0.0
+ * Version: 1.0.1
  * Plugin URI: https://github.com/woocommerce/bookings-helper
  * Description: This extension is a WooCommerce Bookings helper which helps you to troubleshoot bookings setup easier by allowing you to quickly export/import product settings.
  * Author: WooCommerce
@@ -306,7 +306,7 @@ if ( ! class_exists( 'Bookings_Helper' ) ) {
 		 * Exports a specific product by ID.
 		 *
 		 * @since 1.0.0
-		 * @version 1.0.0
+		 * @version 1.0.1
 		 */
 		public function export_product() {
 			try {
@@ -321,6 +321,10 @@ if ( ! class_exists( 'Bookings_Helper' ) ) {
 
 				// Products.
 				$product = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$wpdb->posts} WHERE post_type = 'product' AND ID = %d", $product_id ), ARRAY_A );
+
+				// Get the type of the product, accomm or booking.
+				$product_type       = wp_get_post_terms( $product[0]['ID'], 'product_type' );
+				$product[0]['type'] = $product_type[0]->name;
 
 				if ( empty( $product ) ) {
 					throw new Exception( 'This booking product does not exist!' );
@@ -383,7 +387,7 @@ if ( ! class_exists( 'Bookings_Helper' ) ) {
 		 * Imports booking product from file.
 		 *
 		 * @since 1.0.0
-		 * @version 1.0.0
+		 * @version 1.0.1
 		 */
 		public function import_product() {
 			try {
@@ -407,9 +411,10 @@ if ( ! class_exists( 'Bookings_Helper' ) ) {
 
 				// Product.
 				$product_data = array( 
-					'post_title'  => sanitize_text_field( $product['product']['post_title'] ) . ' (bookings test #' . absint( $product['product']['ID'] ) . ')',
-					'post_type'   => 'product',
-					'post_status' => 'publish',
+					'post_title'   => sanitize_text_field( $product['product']['post_title'] ) . ' (bookings test #' . absint( $product['product']['ID'] ) . ')',
+					'post_content' => sanitize_text_field( $product['product']['post_content'] ),
+					'post_type'    => 'product',
+					'post_status'  => 'publish',
 				);
 
 				$product_id = wp_insert_post( $product_data, false );
@@ -423,7 +428,8 @@ if ( ! class_exists( 'Bookings_Helper' ) ) {
 					$wpdb->query( $wpdb->prepare( "INSERT INTO {$wpdb->postmeta} ( post_id, meta_key, meta_value ) VALUES ( %d, %s, %s )", $product_id, sanitize_text_field( $meta['meta_key'] ), sanitize_text_field( $meta['meta_value'] ) ) );
 				}
 
-				wp_set_object_terms( $product_id, 'booking', 'product_type' );
+				$product_type = ! empty( $product['product']['type'] ) ? $product['product']['type'] : 'booking';
+				wp_set_object_terms( $product_id, $product_type, 'product_type' );
 
 				// Resources.
 				if ( ! empty( $product['resources'] ) ) {
@@ -431,7 +437,6 @@ if ( ! class_exists( 'Bookings_Helper' ) ) {
 					$new_resource_base_costs  = array();
 					$resource_block_costs     = get_post_meta( $product_id, '_resource_block_costs', true );
 					$new_resource_block_costs = array();
-					$i                        = 0;
 
 					foreach ( $product['resources'] as $resource ) {
 						$resource_data = array( 
@@ -450,12 +455,10 @@ if ( ! class_exists( 'Bookings_Helper' ) ) {
 							$wpdb->query( $wpdb->prepare( "INSERT INTO {$wpdb->postmeta} ( post_id, meta_key, meta_value ) VALUES ( %d, %s, %s )", $resource_id, sanitize_text_field( $meta['meta_key'] ), sanitize_text_field( $meta['meta_value'] ) ) );		
 						}
 
-						$new_resource_base_costs[ $resource_id ]  = array_values( $resource_base_costs )[ $i ];
-						$new_resource_block_costs[ $resource_id ] = array_values( $resource_block_costs )[ $i ];
+						$new_resource_base_costs[ $resource_id ]  = $resource_base_costs[ $resource['resource']['ID'] ];
+						$new_resource_block_costs[ $resource_id ] = $resource_block_costs[ $resource['resource']['ID'] ];
 
 						$wpdb->query( $wpdb->prepare( "INSERT INTO {$wpdb->prefix}wc_booking_relationships ( product_id, resource_id ) VALUES ( %d, %d )", $product_id, $resource_id ) );
-
-						$i++;
 					}
 
 					if ( ! empty( $new_resource_base_costs ) ) {
