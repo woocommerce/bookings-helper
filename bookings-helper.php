@@ -97,7 +97,7 @@ if ( ! class_exists( 'Bookings_Helper' ) ) {
 						<table>
 							<tr>
 								<td>
-									<label>Choose a file (JSON).</label><input type="file" name="import" />
+									<label>Choose a file (ZIP).</label><input type="file" name="import" />
 								</td>
 							</tr>
 
@@ -135,7 +135,7 @@ if ( ! class_exists( 'Bookings_Helper' ) ) {
 						<table>
 							<tr>
 								<td>
-									<label>Choose a file (JSON).</label><input type="file" name="import" />
+									<label>Choose a file (ZIP).</label><input type="file" name="import" />
 								</td>
 							</tr>
 
@@ -206,6 +206,29 @@ if ( ! class_exists( 'Bookings_Helper' ) ) {
 		}
 
 		/**
+		 * Creates the zip file from memory.
+		 *
+		 * @since 1.0.2
+		 * @version 1.0.2
+		 * @param JSON string $data | Data to be zipped
+		 * @param string $filename
+		 */
+		public function create_zip( $data = false, $filename ) {
+			$zip_file = get_temp_dir() . $filename . '.zip';
+
+			$zip = new ZipArchive();
+			$zip->open( $zip_file, ZIPARCHIVE::CREATE | ZIPARCHIVE::OVERWRITE );
+			$zip->addFromString( $filename . '.json', $data );
+			$zip->close();
+
+			if ( file_exists( get_temp_dir() . $filename . '.zip' ) ) {
+				return true;
+			}
+
+			return false;
+		}
+
+		/**
 		 * Triggers the download feature of the browser.
 		 *
 		 * @since 1.0.0
@@ -231,15 +254,21 @@ if ( ! class_exists( 'Bookings_Helper' ) ) {
 
 			$filename_prefix = $prefix;
 
-			$filename = sprintf( '%1$s-%2$s.json', $filename_prefix, date( 'Y-m-d', current_time( 'timestamp' ) ) );
+			$filename = sprintf( '%1$s-%2$s', $filename_prefix, date( 'Y-m-d', current_time( 'timestamp' ) ) );
 
-			header( 'Content-Type: application/json; charset=UTF-8' );
-			header( 'Content-Disposition: attachment; filename=' . $filename );
-			header( 'Pragma: no-cache' );
-			header( 'Expires: 0' );
-			file_put_contents( 'php://output', $data );
+			if ( $this->create_zip( $data, $filename ) ) {
 
-			exit;
+				header( 'Content-Type: application/zip; charset=UTF-8' );
+				header( 'Content-Disposition: attachment; filename=' . $filename . '.zip' );
+				header( 'Pragma: no-cache' );
+				header( 'Expires: 0' );
+				readfile( get_temp_dir() . $filename . '.zip' );
+				unlink( get_temp_dir() . $filename . '.zip' );
+
+				exit;
+			} else {
+				throw new Exception( 'Unable to export!' );
+			}
 		}
 
 		/**
