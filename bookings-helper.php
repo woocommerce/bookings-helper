@@ -262,17 +262,19 @@ if ( ! class_exists( 'Bookings_Helper' ) ) {
 			}
 
 			if ( is_dir( $path ) ) {
-				$files = glob( $path . '*', GLOB_MARK );
+				$objects = scandir( $path );
 
-				foreach ( $files as $file ) {
-					$this->clean_up( $file );
+				foreach ( $objects as $object ) {
+					if ( '.' !== $object && '..' !== $object ) {
+						if ( is_dir( $path . '/' . $object ) ) {
+							$this->clean_up( $path . '/' . $object );
+						} else {
+							unlink( $path . '/' . $object );
+						}
+					}
 				}
 
-				if ( file_exists( $path ) ) {
-					rmdir( $path );
-				}
-			} elseif ( is_file( $path ) ) {
-				unlink( $path );  
+				rmdir( $path );
 			}
 		}
 
@@ -304,22 +306,33 @@ if ( ! class_exists( 'Bookings_Helper' ) ) {
 		 *
 		 * @since 1.0.2
 		 * @version 1.0.2
-		 * @param string $filename
 		 */
-		public function open_zip( $filename = '' ) {
+		public function open_zip() {
 			$zip = new ZipArchive();
 
 			if ( true === $zip->open( $_FILES['import']['tmp_name'] ) ) {
 				$zip->extractTo( $this->temp_dir );
 				$zip->close();
 
-				$dir = scandir( $this->temp_dir );
+				$dir       = scandir( $this->temp_dir );
+				$json_file = '';
 
-				if ( ! file_exists( $this->temp_dir . '/' . $dir[2] ) ) {
+				/**
+				 * The zip may or may not contain other hidden
+				 * system files so we must only extract the .json file.
+				 */
+				foreach ( $dir as $file ) {
+					if ( preg_match( '/.json/', $file ) ) {
+						$json_file = $file;
+						break;
+					}
+				}
+
+				if ( ! file_exists( $this->temp_dir . '/' . $json_file ) ) {
 					throw new Exception( 'Unable to open zip file' );
 				}
 
-				return file_get_contents( $this->temp_dir . '/' . $dir[2] );
+				return file_get_contents( $this->temp_dir . '/' . $json_file );
 			} else {
 				throw new Exception( 'Unable to open zip file' );
 			}
