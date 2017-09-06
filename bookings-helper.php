@@ -26,6 +26,22 @@ if ( ! class_exists( 'Bookings_Helper' ) ) {
 	 * @version 1.0.0
 	 */
 	class Bookings_Helper {
+		/**
+		 * Temporary directory path.
+		 *
+		 * @since 1.0.2
+		 * @version 1.0.2
+		 * @var
+		 */
+		public $temp_dir;
+
+		/**
+		 * Notices.
+		 *
+		 * @since 1.0.0
+		 * @version 1.0.0
+		 * @var
+		 */
 		public $notice;
 
 		/**
@@ -35,6 +51,7 @@ if ( ! class_exists( 'Bookings_Helper' ) ) {
 		 * @version 1.0.0
 		 */
 		public function __construct() {
+			$this->temp_dir = get_temp_dir() . 'bookings-helper';
 			$this->init();
 		}
 
@@ -206,7 +223,19 @@ if ( ! class_exists( 'Bookings_Helper' ) ) {
 		}
 
 		/**
-		 * Creates the zip file from memory.
+		 * Prepares the directory for file transfer.
+		 *
+		 * @since 1.0.2
+		 * @version 1.0.2
+		 */
+		public function prep_transfer() {
+			if ( ! is_dir( $this->temp_dir ) ) {
+				return mkdir( $this->temp_dir );
+			}
+		}
+
+		/**
+		 * Creates the zip file.
 		 *
 		 * @since 1.0.2
 		 * @version 1.0.2
@@ -214,18 +243,66 @@ if ( ! class_exists( 'Bookings_Helper' ) ) {
 		 * @param string $filename
 		 */
 		public function create_zip( $data = false, $filename ) {
-			$zip_file = get_temp_dir() . $filename . '.zip';
+			$zip_file = $this->temp_dir . '/' . $filename . '.zip';
 
 			$zip = new ZipArchive();
 			$zip->open( $zip_file, ZIPARCHIVE::CREATE | ZIPARCHIVE::OVERWRITE );
 			$zip->addFromString( $filename . '.json', $data );
 			$zip->close();
 
-			if ( file_exists( get_temp_dir() . $filename . '.zip' ) ) {
+			if ( file_exists( $this->temp_dir . '/' . $filename . '.zip' ) ) {
 				return true;
 			}
 
 			return false;
+		}
+
+		/**
+		 * Cleans up lingering files and folder during transfer.
+		 *
+		 * @since 1.0.2
+		 * @version 1.0.2
+		 */
+		public function clean_up( $path = null ) {
+			if ( null === $path ) {
+				$path = $this->temp_dir;
+			}
+
+			if ( is_dir( $path ) ) {
+				$files = glob( $path . '*', GLOB_MARK );
+
+				foreach ( $files as $file ) {
+					$this->clean_up( $file );
+				}
+
+				if ( file_exists( $path ) ) {
+					rmdir( $path );
+				}
+			} elseif ( is_file( $path ) ) {
+				unlink( $path );  
+			}
+		}
+
+		/**
+		 * Opens the zip file.
+		 *
+		 * @since 1.0.2
+		 * @version 1.0.2
+		 * @param string $filename
+		 */
+		public function open_zip( $filename = '' ) {
+			$zip = new ZipArchive();
+
+			if ( $zip->open( $_FILES['import']['tmp_name'] ) ) {
+				$zip->extractTo( $this->temp_dir );
+				$zip->close();
+
+				$dir = scandir( $this->temp_dir );
+
+				return file_get_contents( $this->temp_dir . '/' . $dir[2] );
+			} else {
+				throw new Exception( 'Unable to open zip file' );
+			}
 		}
 
 		/**
@@ -256,14 +333,16 @@ if ( ! class_exists( 'Bookings_Helper' ) ) {
 
 			$filename = sprintf( '%1$s-%2$s', $filename_prefix, date( 'Y-m-d', current_time( 'timestamp' ) ) );
 
-			if ( $this->create_zip( $data, $filename ) ) {
+			$this->prep_transfer();
 
+			if ( $this->create_zip( $data, $filename ) ) {
 				header( 'Content-Type: application/zip; charset=UTF-8' );
 				header( 'Content-Disposition: attachment; filename=' . $filename . '.zip' );
 				header( 'Pragma: no-cache' );
 				header( 'Expires: 0' );
-				readfile( get_temp_dir() . $filename . '.zip' );
-				unlink( get_temp_dir() . $filename . '.zip' );
+				readfile( $this->temp_dir . '/' . $filename . '.zip' );
+
+				$this->clean_up();
 
 				exit;
 			} else {
@@ -310,7 +389,7 @@ if ( ! class_exists( 'Bookings_Helper' ) ) {
 						throw new Exception( 'The file exceeds 1MB.' );
 					}
 
-					$global_rules_json = file_get_contents( $_FILES['import']['tmp_name'] );
+					$global_rules_json = $this->open_zip();
 
 					if ( ! $this->is_json( $global_rules_json ) ) {
 						throw new Exception( 'The file is not in a valid JSON format.' );
@@ -319,9 +398,18 @@ if ( ! class_exists( 'Bookings_Helper' ) ) {
 
 				$global_rules = json_decode( $global_rules_json, true );
 
-				update_option( 'wc_global_booking_availability', $global_rules );
+				// Sanitize.
+				array_walk_recursive( $global_rules, 'wc_clean' );
+
+				/**
+				 * For some strange reason update_option is not working here so
+				 * had to revert to delete the option and add it again.
+				 */
+				delete_option( 'wc_global_booking_availability' );
+				add_option( 'wc_global_booking_availability', $global_rules );
 
 				$this->print_notice( 'Global Availability Rules imported successfully!', 'success' );
+				$this->clean_up();
 
 				return;
 			} catch ( Exception $e ) {
@@ -427,7 +515,7 @@ if ( ! class_exists( 'Bookings_Helper' ) ) {
 						throw new Exception( 'The file exceeds 1MB.' );
 					}
 
-					$product_json = file_get_contents( $_FILES['import']['tmp_name'] );
+					$product_json = $this->open_zip();
 
 					if ( ! $this->is_json( $product_json ) ) {
 						throw new Exception( 'The file is not in a valid JSON format.' );
@@ -435,6 +523,9 @@ if ( ! class_exists( 'Bookings_Helper' ) ) {
 				}
 
 				$product = json_decode( $product_json, true );
+
+				// Sanitize.
+				array_walk_recursive( $product, 'wc_clean' );
 
 				global $wpdb;
 
@@ -523,6 +614,7 @@ if ( ! class_exists( 'Bookings_Helper' ) ) {
 				}
 
 				$this->print_notice( 'Booking Product imported successfully!', 'success' );
+				$this->clean_up();
 
 				return;
 			} catch ( Exception $e ) {

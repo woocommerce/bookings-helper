@@ -2,6 +2,7 @@
 
 2017-09-xx - version 1.0.2
 * Add - Export into zip file instead of json.
+* Add - Import via zip file.
 
 2017-07-06 - version 1.0.1
 * Fix   - Syntax error preventing activation on some systems
