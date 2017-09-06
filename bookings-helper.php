@@ -26,15 +26,42 @@ if ( ! class_exists( 'Bookings_Helper' ) ) {
 	 * @version 1.0.0
 	 */
 	class Bookings_Helper {
+		/**
+		 * Temporary directory path.
+		 *
+		 * @since 1.0.2
+		 * @version 1.0.2
+		 * @var
+		 */
+		public $temp_dir;
+
+		/**
+		 * Notices.
+		 *
+		 * @since 1.0.0
+		 * @version 1.0.0
+		 * @var
+		 */
 		public $notice;
+
+		/**
+		 * Checks to see if ZipArchive library exists.
+		 *
+		 * @since 1.0.2
+		 * @version 1.0.2
+		 * @var
+		 */
+		public $ziparchive_available;
 
 		/**
 		 * Constructor.
 		 *
 		 * @since 1.0.0
-		 * @version 1.0.0
+		 * @version 1.0.2
 		 */
 		public function __construct() {
+			$this->temp_dir              = get_temp_dir() . 'bookings-helper';
+			$this->ziparchive_available  = class_exists( 'ZipArchive' ) ? true : false;
 			$this->init();
 		}
 
@@ -69,6 +96,8 @@ if ( ! class_exists( 'Bookings_Helper' ) ) {
 			if ( ! empty( $this->notice ) ) {
 				echo $this->notice;
 			}
+
+			$file_label = $this->ziparchive_available ? 'ZIP' : 'JSON';
 			?>
 			<div class="wrap">
 				<h1>Bookings Helper</h1>
@@ -97,7 +126,7 @@ if ( ! class_exists( 'Bookings_Helper' ) ) {
 						<table>
 							<tr>
 								<td>
-									<label>Choose a file (JSON).</label><input type="file" name="import" />
+									<label>Choose a file (<?php echo $file_label; ?>).</label><input type="file" name="import" />
 								</td>
 							</tr>
 
@@ -135,7 +164,7 @@ if ( ! class_exists( 'Bookings_Helper' ) ) {
 						<table>
 							<tr>
 								<td>
-									<label>Choose a file (JSON).</label><input type="file" name="import" />
+									<label>Choose a file (<?php echo $file_label; ?>).</label><input type="file" name="import" />
 								</td>
 							</tr>
 
@@ -151,6 +180,10 @@ if ( ! class_exists( 'Bookings_Helper' ) ) {
 				</div>
 			</div>
 			<?php
+
+			if ( ! $this->ziparchive_available ) {
+				echo '<div><p><strong style="color:red;">PHP ZipArchive extension is not installed. Import/Export will be in JSON format.</strong></p></div>';
+			}
 		}
 
 		/**
@@ -206,6 +239,126 @@ if ( ! class_exists( 'Bookings_Helper' ) ) {
 		}
 
 		/**
+		 * Prepares the directory for file transfer.
+		 *
+		 * @since 1.0.2
+		 * @version 1.0.2
+		 */
+		public function prep_transfer() {
+			if ( ! is_dir( $this->temp_dir ) ) {
+				return mkdir( $this->temp_dir );
+			}
+		}
+
+		/**
+		 * Cleans up lingering files and folder during transfer.
+		 *
+		 * @since 1.0.2
+		 * @version 1.0.2
+		 */
+		public function clean_up( $path = null ) {
+			if ( null === $path ) {
+				$path = $this->temp_dir;
+			}
+
+			if ( is_dir( $path ) ) {
+				$objects = scandir( $path );
+
+				foreach ( $objects as $object ) {
+					if ( '.' !== $object && '..' !== $object ) {
+						if ( is_dir( $path . '/' . $object ) ) {
+							$this->clean_up( $path . '/' . $object );
+						} else {
+							unlink( $path . '/' . $object );
+						}
+					}
+				}
+
+				rmdir( $path );
+			}
+		}
+
+		/**
+		 * Creates the zip file.
+		 *
+		 * @since 1.0.2
+		 * @version 1.0.2
+		 * @param JSON string $data | Data to be zipped
+		 * @param string $filename
+		 */
+		public function create_zip( $data = false, $filename ) {
+			$zip_file = $this->temp_dir . '/' . $filename . '.zip';
+
+			$zip = new ZipArchive();
+			$zip->open( $zip_file, ZIPARCHIVE::CREATE | ZIPARCHIVE::OVERWRITE );
+			$zip->addFromString( $filename . '.json', $data );
+			$zip->close();
+
+			if ( file_exists( $this->temp_dir . '/' . $filename . '.zip' ) ) {
+				return true;
+			}
+
+			return false;
+		}
+
+		/**
+		 * Opens the zip file.
+		 *
+		 * @since 1.0.2
+		 * @version 1.0.2
+		 */
+		public function open_zip() {
+			$zip = new ZipArchive();
+
+			if ( true === $zip->open( $_FILES['import']['tmp_name'] ) ) {
+				$zip->extractTo( $this->temp_dir );
+				$zip->close();
+
+				$dir       = scandir( $this->temp_dir );
+				$json_file = '';
+
+				/**
+				 * The zip may or may not contain other hidden
+				 * system files so we must only extract the .json file.
+				 */
+				foreach ( $dir as $file ) {
+					if ( preg_match( '/.json/', $file ) ) {
+						$json_file = $file;
+						break;
+					}
+				}
+
+				if ( ! file_exists( $this->temp_dir . '/' . $json_file ) ) {
+					throw new Exception( 'Unable to open zip file' );
+				}
+
+				return file_get_contents( $this->temp_dir . '/' . $json_file );
+			} else {
+				throw new Exception( 'Unable to open zip file' );
+			}
+		}
+
+		/**
+		 * Renders the HTTP headers
+		 *
+		 * @since 1.0.2
+		 * @version 1.0.2
+		 * @param string $filename | Path to file
+		 */
+		public function render_headers( $filename ) {
+			$type = 'json';
+
+			if ( $this->ziparchive_available ) {
+				$type = 'zip';
+			}
+
+			header( 'Content-Type: application/' . $type . '; charset=UTF-8' );
+			header( 'Content-Disposition: attachment; filename=' . $filename . '.' . $type );
+			header( 'Pragma: no-cache' );
+			header( 'Expires: 0' );
+		}
+
+		/**
 		 * Triggers the download feature of the browser.
 		 *
 		 * @since 1.0.0
@@ -231,15 +384,31 @@ if ( ! class_exists( 'Bookings_Helper' ) ) {
 
 			$filename_prefix = $prefix;
 
-			$filename = sprintf( '%1$s-%2$s.json', $filename_prefix, date( 'Y-m-d', current_time( 'timestamp' ) ) );
+			if ( $this->ziparchive_available ) {
+				$filename = sprintf( '%1$s-%2$s', $filename_prefix, date( 'Y-m-d', current_time( 'timestamp' ) ) );
 
-			header( 'Content-Type: application/json; charset=UTF-8' );
-			header( 'Content-Disposition: attachment; filename=' . $filename );
-			header( 'Pragma: no-cache' );
-			header( 'Expires: 0' );
-			file_put_contents( 'php://output', $data );
+				$this->prep_transfer();
 
-			exit;
+				$this->render_headers( $filename );
+
+				if ( $this->create_zip( $data, $filename ) ) {
+					readfile( $this->temp_dir . '/' . $filename . '.zip' );
+
+					$this->clean_up();
+
+					exit;
+				} else {
+					throw new Exception( 'Unable to export!' );
+				}
+			} else {
+				$filename = sprintf( '%1$s-%2$s.json', $filename_prefix, date( 'Y-m-d', current_time( 'timestamp' ) ) );
+
+				$this->render_headers( $filename );
+
+				file_put_contents( 'php://output', $data );
+
+				exit;
+			}
 		}
 
 		/**
@@ -281,7 +450,11 @@ if ( ! class_exists( 'Bookings_Helper' ) ) {
 						throw new Exception( 'The file exceeds 1MB.' );
 					}
 
-					$global_rules_json = file_get_contents( $_FILES['import']['tmp_name'] );
+					if ( $this->ziparchive_available ) {
+						$global_rules_json = $this->open_zip();
+					} else {
+						$global_rules_json = file_get_contents( $_FILES['import']['tmp_name'] );
+					}
 
 					if ( ! $this->is_json( $global_rules_json ) ) {
 						throw new Exception( 'The file is not in a valid JSON format.' );
@@ -290,9 +463,18 @@ if ( ! class_exists( 'Bookings_Helper' ) ) {
 
 				$global_rules = json_decode( $global_rules_json, true );
 
-				update_option( 'wc_global_booking_availability', $global_rules );
+				// Sanitize.
+				array_walk_recursive( $global_rules, 'wc_clean' );
+
+				/**
+				 * For some strange reason update_option is not working here so
+				 * had to revert to delete the option and add it again.
+				 */
+				delete_option( 'wc_global_booking_availability' );
+				add_option( 'wc_global_booking_availability', $global_rules );
 
 				$this->print_notice( 'Global Availability Rules imported successfully!', 'success' );
+				$this->clean_up();
 
 				return;
 			} catch ( Exception $e ) {
@@ -398,7 +580,11 @@ if ( ! class_exists( 'Bookings_Helper' ) ) {
 						throw new Exception( 'The file exceeds 1MB.' );
 					}
 
-					$product_json = file_get_contents( $_FILES['import']['tmp_name'] );
+					if ( $this->ziparchive_available ) {
+						$product_json = $this->open_zip();
+					} else {
+						$product_json = file_get_contents( $_FILES['import']['tmp_name'] );
+					}
 
 					if ( ! $this->is_json( $product_json ) ) {
 						throw new Exception( 'The file is not in a valid JSON format.' );
@@ -406,6 +592,9 @@ if ( ! class_exists( 'Bookings_Helper' ) ) {
 				}
 
 				$product = json_decode( $product_json, true );
+
+				// Sanitize.
+				array_walk_recursive( $product, 'wc_clean' );
 
 				global $wpdb;
 
@@ -494,6 +683,7 @@ if ( ! class_exists( 'Bookings_Helper' ) ) {
 				}
 
 				$this->print_notice( 'Booking Product imported successfully!', 'success' );
+				$this->clean_up();
 
 				return;
 			} catch ( Exception $e ) {
