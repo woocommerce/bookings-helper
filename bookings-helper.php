@@ -419,7 +419,11 @@ if ( ! class_exists( 'Bookings_Helper' ) ) {
 		 */
 		public function export_global_rules() {
 			try {
-				$global_rules = get_option( 'wc_global_booking_availability', array() );
+				if ( version_compare( WC_BOOKINGS_VERSION, '1.13.0', '<' ) ) {
+					$global_rules = get_option( 'wc_global_booking_availability', array() );
+				} else {
+					$global_rules = WC_Data_Store::load( 'booking-global-availability' )->get_all_as_array();
+				}
 
 				if ( empty( $global_rules ) ) {
 					throw new Exception( 'There are no rules to export.' );					
@@ -438,8 +442,7 @@ if ( ! class_exists( 'Bookings_Helper' ) ) {
 		/**
 		 * Imports global availability rules from file.
 		 *
-		 * @since 1.0.0
-		 * @version 1.0.0
+		 * @since 1.0.3 Add compatibility with Bookings custom global availability tables.
 		 */
 		public function import_global_rules() {
 			try {
@@ -466,12 +469,53 @@ if ( ! class_exists( 'Bookings_Helper' ) ) {
 				// Sanitize.
 				array_walk_recursive( $global_rules, 'wc_clean' );
 
-				/**
-				 * For some strange reason update_option is not working here so
-				 * had to revert to delete the option and add it again.
-				 */
-				delete_option( 'wc_global_booking_availability' );
-				add_option( 'wc_global_booking_availability', $global_rules );
+				if ( version_compare( WC_BOOKINGS_VERSION, '1.13.0', '<' ) ) {
+					/*
+					 * For some strange reason update_option is not working here so
+					 * had to revert to delete the option and add it again.
+					 */
+					delete_option( 'wc_global_booking_availability' );
+					add_option( 'wc_global_booking_availability', $global_rules );
+				} else {
+					global $wpdb;
+
+					// First delete all data from table.
+					$wpdb->query( "TRUNCATE TABLE {$wpdb->prefix}wc_bookings_availability" );
+
+					foreach ( $global_rules as $rule ) {
+						$wpdb->insert(
+							$wpdb->prefix . 'wc_bookings_availability',
+							array(
+								'gcal_event_id' => $rule['gcal_event_id'],
+								'title' => $rule['title'],
+								'range_type' => $rule['range_type'],
+								'from_date' => $rule['from_date'],
+								'to_date' => $rule['to_date'],
+								'from_range' => $rule['from_range'],
+								'to_range' => $rule['to_range'],
+								'bookable' => $rule['bookable'],
+								'priority' => $rule['priority'],
+								'ordering' => $rule['ordering'],
+								'date_created' => $rule['date_created'],
+								'date_modified' => $rule['date_modified'],
+							),
+							array(
+								'%s',
+								'%s',
+								'%s',
+								'%s',
+								'%s',
+								'%s',
+								'%s',
+								'%s',
+								'%d',
+								'%d',
+								'%s',
+								'%s',
+							)
+						);
+					}
+				}
 
 				$this->print_notice( 'Global Availability Rules imported successfully!', 'success' );
 				$this->clean_up();
