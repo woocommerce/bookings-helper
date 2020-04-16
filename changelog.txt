@@ -1,6 +1,6 @@
 *** Bookings Helper Changelog ***
 
-2019-xx-xx - version 1.0.3
+2020-04-16 - version 1.0.3
 * Add - Compatibility with Bookings custom global availability tables.
 * Fix - Notices when importing products with resources and no set block/base costs.
 
