@@ -9,7 +9,7 @@
   },
   "config": {
     "platform": {
-      "php": "7.2"
+      "php": "7.0"
     },
     "allow-plugins": {
       "composer/installers": true,

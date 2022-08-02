@@ -20,7 +20,7 @@ jobs:
       - name: Set PHP version
         uses: shivammathur/setup-php@v2
         with:
-          php-version: 7.4
+          php-version: 7.0
           tools: composer:v2
           coverage: none
 
@@ -28,4 +28,4 @@ jobs:
         run: composer install
 
       - name: Run PHP Compatibility
-        run: ./vendor/bin/phpcs *.php includes -p --standard=PHPCompatibilityWP --extensions=php --runtime-set testVersion 7.2-
+        run: ./vendor/bin/phpcs *.php includes -p --standard=PHPCompatibilityWP --extensions=php --runtime-set testVersion 7.0-
