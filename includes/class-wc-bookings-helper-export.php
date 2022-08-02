@@ -72,7 +72,7 @@ class WC_Booking_Helper_Export extends WC_Bookings_Helper_Utils {
 			}
 
 			if ( empty( $global_rules ) ) {
-				throw new Exception( 'There are no rules to export.' );
+				throw new Exception( __( 'There are no rules to export.', 'bookings-helper' ) );
 			}
 
 			$global_rules_json = json_encode( $global_rules );
@@ -97,7 +97,7 @@ class WC_Booking_Helper_Export extends WC_Bookings_Helper_Utils {
 			$product_status = get_post_status( $product_id );
 
 			if ( empty( $product_id ) || empty( $product_status ) ) {
-				throw new Exception( 'This booking product does not exist!' );
+				throw new Exception( __( 'This booking product does not exist!', 'bookings-helper' ) );
 			}
 
 			global $wpdb;
@@ -110,14 +110,14 @@ class WC_Booking_Helper_Export extends WC_Bookings_Helper_Utils {
 			$product[0]['type'] = $product_type[0]->name;
 
 			if ( empty( $product ) ) {
-				throw new Exception( 'This booking product does not exist!' );
+				throw new Exception( __( 'This booking product does not exist!', 'bookings-helper' ) );
 			}
 
 			// Product metas.
 			$product_meta = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$wpdb->postmeta} WHERE post_id = %d AND ( meta_key LIKE '%%wc_booking%%' OR meta_key = '_resource_base_costs' OR meta_key = '_resource_block_costs' OR meta_key = '_wc_display_cost' OR meta_key = '_virtual' )", $product_id ), ARRAY_A );
 
 			if ( empty( $product_meta ) ) {
-				throw new Exception( 'This booking product does not exist!' );
+				throw new Exception( __( 'This booking product does not exist!', 'bookings-helper' ) );
 			}
 
 			// Booking relationships ( resources ).

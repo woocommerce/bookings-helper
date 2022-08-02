@@ -98,13 +98,13 @@ class WC_Bookings_Helper_Utils {
 	/**
 	 * Creates the zip file.
 	 *
-	 * @param JSON string $data | Data to be zipped
 	 * @param string $filename
+	 * @param JSON string $data | Data to be zipped
 	 *
 	 * @since 1.0.2
 	 * @version 1.0.2
 	 */
-	public function create_zip( $data = false, $filename ) {
+	public function create_zip( $filename, $data = false ) {
 		$zip_file = $this->temp_dir . '/' . $filename . '.zip';
 
 		$zip = new ZipArchive();
@@ -153,14 +153,14 @@ class WC_Bookings_Helper_Utils {
 
 			$this->render_headers( $filename );
 
-			if ( $this->create_zip( $data, $filename ) ) {
+			if ( $this->create_zip( $filename, $data ) ) {
 				readfile( $this->temp_dir . '/' . $filename . '.zip' );
 
 				$this->clean_up();
 
 				exit;
 			} else {
-				throw new Exception( 'Unable to export!' );
+				throw new Exception( __( 'Unable to export!', 'bookings-helper' ) );
 			}
 		} else {
 			$filename = sprintf( '%1$s-%2$s.json', $filename_prefix, date( 'Y-m-d', current_time( 'timestamp' ) ) );
@@ -201,12 +201,12 @@ class WC_Bookings_Helper_Utils {
 			}
 
 			if ( ! file_exists( $this->temp_dir . '/' . $json_file ) ) {
-				throw new Exception( 'Unable to open zip file' );
+				throw new Exception( __( 'Unable to open zip file', 'bookings-helper' ) );
 			}
 
 			return file_get_contents( $this->temp_dir . '/' . $json_file );
 		} else {
-			throw new Exception( 'Unable to open zip file' );
+			throw new Exception( __( 'Unable to open zip file', 'bookings-helper' ) );
 		}
 	}
 

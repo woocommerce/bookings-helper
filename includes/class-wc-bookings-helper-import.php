@@ -61,10 +61,10 @@ class WC_Booking_Helper_Import extends WC_Bookings_Helper_Utils {
 	public function import_global_rules() {
 		try {
 			if ( empty( $_FILES ) || empty( $_FILES['import'] ) || 0 !== $_FILES['import']['error'] || empty( $_FILES['import']['tmp_name'] ) ) {
-				throw new Exception( 'There are no rules to import or file is not valid.' );
+				throw new Exception( __( 'There are no rules to import or file is not valid.', 'bookings-helper' ) );
 			} else {
 				if ( $_FILES['import']['size'] > 1000000 ) {
-					throw new Exception( 'The file exceeds 1MB.' );
+					throw new Exception( __( 'The file exceeds 1MB.', 'bookings-helper' ) );
 				}
 
 				if ( $this->ziparchive_available ) {
@@ -74,7 +74,7 @@ class WC_Booking_Helper_Import extends WC_Bookings_Helper_Utils {
 				}
 
 				if ( ! $this->is_json( $global_rules_json ) ) {
-					throw new Exception( 'The file is not in a valid JSON format.' );
+					throw new Exception( __( 'The file is not in a valid JSON format.', 'bookings-helper' ) );
 				}
 			}
 
@@ -132,7 +132,7 @@ class WC_Booking_Helper_Import extends WC_Bookings_Helper_Utils {
 				}
 			}
 
-			$this->wc_bookings_helper_prepare_notice( 'Global Availability Rules imported successfully!', 'success' );
+			$this->wc_bookings_helper_prepare_notice( __( 'Global Availability Rules imported successfully!', 'bookings-helper' ), 'success' );
 			$this->clean_up();
 
 			return;
@@ -153,10 +153,10 @@ class WC_Booking_Helper_Import extends WC_Bookings_Helper_Utils {
 	public function import_product() {
 		try {
 			if ( empty( $_FILES ) || empty( $_FILES['import'] ) || 0 !== $_FILES['import']['error'] || empty( $_FILES['import']['tmp_name'] ) ) {
-				throw new Exception( 'There is no bookable product to import or file is not valid.' );
+				throw new Exception( __( 'There is no bookable product to import or file is not valid.', 'bookings-helper' ) );
 			} else {
 				if ( $_FILES['import']['size'] > 1000000 ) {
-					throw new Exception( 'The file exceeds 1MB.' );
+					throw new Exception( __( 'The file exceeds 1MB.', 'bookings-helper' ) );
 				}
 
 				if ( $this->ziparchive_available ) {
@@ -166,7 +166,7 @@ class WC_Booking_Helper_Import extends WC_Bookings_Helper_Utils {
 				}
 
 				if ( ! $this->is_json( $product_json ) ) {
-					throw new Exception( 'The file is not in a valid JSON format.' );
+					throw new Exception( __( 'The file is not in a valid JSON format.', 'bookings-helper' ) );
 				}
 			}
 
@@ -216,7 +216,7 @@ class WC_Booking_Helper_Import extends WC_Bookings_Helper_Utils {
 					$resource_id = wp_insert_post( $resource_data, false );
 
 					if ( empty( $resource_id ) ) {
-						throw new Exception( 'Failed to create resource.' );
+						throw new Exception( __( 'Failed to create resource.', 'bookings-helper' ) );
 					}
 
 					foreach ( $resource['resource_meta'] as $meta ) {
@@ -251,7 +251,7 @@ class WC_Booking_Helper_Import extends WC_Bookings_Helper_Utils {
 					$person_id = wp_insert_post( $person_data, false );
 
 					if ( empty( $person_id ) ) {
-						throw new Exception( 'Failed to create person.' );
+						throw new Exception( __( 'Failed to create person.', 'bookings-helper' ) );
 					}
 
 					foreach ( $person['person_meta'] as $meta ) {
@@ -260,7 +260,7 @@ class WC_Booking_Helper_Import extends WC_Bookings_Helper_Utils {
 				}
 			}
 
-			$this->wc_bookings_helper_prepare_notice( 'Booking Product imported successfully!', 'success' );
+			$this->wc_bookings_helper_prepare_notice( __( 'Booking Product imported successfully!', 'success', 'bookings-helper' ) );
 			$this->clean_up();
 
 			return;
