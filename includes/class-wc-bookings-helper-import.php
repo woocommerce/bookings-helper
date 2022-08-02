@@ -3,7 +3,8 @@
 /**
  * Class for import functionality.
  */
-class WC_Booking_Helper_Import extends WC_Bookings_Helper_Utils {
+class WC_Bookings_Helper_Import extends WC_Bookings_Helper_Utils {
+
 	/**
 	 * Constructor.
 	 */
@@ -57,6 +58,7 @@ class WC_Booking_Helper_Import extends WC_Bookings_Helper_Utils {
 	 * Imports global availability rules from file.
 	 *
 	 * @since 1.0.3 Add compatibility with Bookings custom global availability tables.
+	 * @throws Exception Show error if file isn't valid.
 	 */
 	public function import_global_rules() {
 		try {
@@ -149,6 +151,7 @@ class WC_Booking_Helper_Import extends WC_Bookings_Helper_Utils {
 	 *
 	 * @since 1.0.0
 	 * @version 1.0.1
+	 * @throws Exception Show error if something goes wrong.
 	 */
 	public function import_product() {
 		try {
@@ -260,7 +263,7 @@ class WC_Booking_Helper_Import extends WC_Bookings_Helper_Utils {
 				}
 			}
 
-			$this->wc_bookings_helper_prepare_notice( __( 'Booking Product imported successfully!', 'success', 'bookings-helper' ) );
+			$this->wc_bookings_helper_prepare_notice( __( 'Booking Product imported successfully!', 'bookings-helper' ), 'success' );
 			$this->clean_up();
 
 			return;
@@ -270,6 +273,7 @@ class WC_Booking_Helper_Import extends WC_Bookings_Helper_Utils {
 			return;
 		}
 	}
+
 }
 
-new WC_Booking_Helper_Import();
+new WC_Bookings_Helper_Import();

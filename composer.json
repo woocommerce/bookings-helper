@@ -1,7 +1,7 @@
 {
   "name": "woocommerce/bookings-helper",
-  "description": "Troubleshoot bookings setup easier by quickly export/import product settings.",
-  "homepage": "https://woocommerce.com/products/bookings-helper/",
+  "description": "Troubleshoot bookings setups easier by quickly exporting/importing product settings.",
+  "homepage": "https://github.com/woocommerce/bookings-helper/",
   "type": "wordpress-plugin",
   "license": "GPL-2.0+",
   "require-dev": {

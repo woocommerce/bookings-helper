@@ -4,19 +4,21 @@
  * Class for util functions.
  */
 class WC_Bookings_Helper_Utils {
+
 	/**
 	 * Notices.
 	 *
 	 * @since 1.0.4
-	 * @var
+	 * @var string
 	 */
 	private $notice = '';
+
 	/**
 	 * Temporary directory path.
 	 *
 	 * @since 1.0.2
 	 * @version 1.0.2
-	 * @var
+	 * @var string
 	 */
 	public $temp_dir;
 
@@ -25,7 +27,7 @@ class WC_Bookings_Helper_Utils {
 	 *
 	 * @since 1.0.2
 	 * @version 1.0.2
-	 * @var
+	 * @var boolean
 	 */
 	public $ziparchive_available;
 
@@ -42,8 +44,8 @@ class WC_Bookings_Helper_Utils {
 	/**
 	 * Prints notices.
 	 *
-	 * @param string $message
-	 * @param string $type
+	 * @param string $message Message to show.
+	 * @param string $type Type of notice.
 	 *
 	 * @since 1.0.0
 	 * @version 1.0.0
@@ -69,6 +71,8 @@ class WC_Bookings_Helper_Utils {
 	 *
 	 * @since 1.0.2
 	 * @version 1.0.2
+	 *
+	 * @param string|null $path Folder path.
 	 */
 	public function clean_up( $path = null ) {
 		if ( null === $path ) {
@@ -95,8 +99,8 @@ class WC_Bookings_Helper_Utils {
 	/**
 	 * Creates the zip file.
 	 *
-	 * @param string $filename
-	 * @param JSON string $data | Data to be zipped
+	 * @param string      $filename Name of file.
+	 * @param JSON string $data | Data to be zipped.
 	 *
 	 * @return bool
 	 * @version 1.0.2
@@ -121,10 +125,10 @@ class WC_Bookings_Helper_Utils {
 	/**
 	 * Triggers the download feature of the browser.
 	 *
-	 * @param string $data
-	 * @param string $prefix
+	 * @param string $data Data to add to file.
+	 * @param string $prefix File prefix to use.
 	 *
-	 * @throws Exception
+	 * @throws Exception Show error if something goes wrong.
 	 * @version 1.0.0
 	 * @since 1.0.0
 	 */
@@ -135,7 +139,7 @@ class WC_Bookings_Helper_Utils {
 
 		@set_time_limit( 0 );
 
-		// Disable GZIP
+		// Disable GZIP.
 		if ( function_exists( 'apache_setenv' ) ) {
 			@apache_setenv( 'no-gzip', 1 );
 		}
@@ -176,7 +180,7 @@ class WC_Bookings_Helper_Utils {
 	/**
 	 * Opens the zip file.
 	 *
-	 * @throws Exception
+	 * @throws Exception Show error if something goes wrong.
 	 * @version 1.0.2
 	 * @since 1.0.2
 	 */
@@ -228,7 +232,7 @@ class WC_Bookings_Helper_Utils {
 	/**
 	 * Renders the HTTP headers
 	 *
-	 * @param string $filename | Path to file
+	 * @param string $filename Path to file.
 	 *
 	 * @version 1.0.2
 	 * @since 1.0.2
@@ -249,7 +253,7 @@ class WC_Bookings_Helper_Utils {
 	/**
 	 * Checks if string is valid JSON.
 	 *
-	 * @param string $string
+	 * @param string $string String to check.
 	 *
 	 * @return bool
 	 * @since 1.0.0
@@ -260,6 +264,7 @@ class WC_Bookings_Helper_Utils {
 
 		return ( JSON_ERROR_NONE === json_last_error() );
 	}
+
 }
 
 new WC_Bookings_Helper_Utils();

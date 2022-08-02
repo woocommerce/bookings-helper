@@ -3,7 +3,7 @@
 /**
  * Class for export functionality.
  */
-class WC_Booking_Helper_Export extends WC_Bookings_Helper_Utils {
+class WC_Bookings_Helper_Export extends WC_Bookings_Helper_Utils {
 
 	/**
 	 * Constructor.
@@ -57,9 +57,8 @@ class WC_Booking_Helper_Export extends WC_Bookings_Helper_Utils {
 	/**
 	 * Exports global availability rules file for browser download.
 	 *
-	 * @param 1.0.0
-	 *
 	 * @since 1.0.0
+	 * @throws Exception If no global rules, show error.
 	 */
 	public function export_global_rules() {
 		try {
@@ -73,7 +72,7 @@ class WC_Booking_Helper_Export extends WC_Bookings_Helper_Utils {
 				throw new Exception( __( 'There are no rules to export.', 'bookings-helper' ) );
 			}
 
-			$global_rules_json = json_encode( $global_rules );
+			$global_rules_json = wp_json_encode( $global_rules );
 
 			$this->trigger_download( $global_rules_json, 'bookings-global-rules' );
 		} catch ( Exception $e ) {
@@ -88,6 +87,7 @@ class WC_Booking_Helper_Export extends WC_Bookings_Helper_Utils {
 	 *
 	 * @since 1.0.0
 	 * @version 1.0.1
+	 * @throws Exception Show error if no product exists.
 	 */
 	public function export_product() {
 		try {
@@ -103,13 +103,13 @@ class WC_Booking_Helper_Export extends WC_Bookings_Helper_Utils {
 			// Products.
 			$product = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$wpdb->posts} WHERE post_type = 'product' AND ID = %d", $product_id ), ARRAY_A );
 
-			// Get the type of the product, accomm or booking.
-			$product_type       = wp_get_post_terms( $product[0]['ID'], 'product_type' );
-			$product[0]['type'] = $product_type[0]->name;
-
 			if ( empty( $product ) ) {
 				throw new Exception( __( 'This booking product does not exist!', 'bookings-helper' ) );
 			}
+
+			// Get the type of the product, accomm or booking.
+			$product_type       = wp_get_post_terms( $product[0]['ID'], 'product_type' );
+			$product[0]['type'] = $product_type[0]->name;
 
 			// Product metas.
 			$product_meta = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$wpdb->postmeta} WHERE post_id = %d AND ( meta_key LIKE '%%wc_booking%%' OR meta_key = '_resource_base_costs' OR meta_key = '_resource_block_costs' OR meta_key = '_wc_display_cost' OR meta_key = '_virtual' )", $product_id ), ARRAY_A );
@@ -134,7 +134,10 @@ class WC_Booking_Helper_Export extends WC_Bookings_Helper_Utils {
 						$resource_meta = $wpdb->get_results( $wpdb->prepare( "SELECT meta_key, meta_value FROM {$wpdb->postmeta} WHERE post_id = %d AND ( meta_key = 'qty' OR meta_key = '_wc_booking_availability' )", $value['resource_id'] ), ARRAY_A );
 					}
 
-					$prepared_resources[] = array( 'resource' => $resource[0], 'resource_meta' => $resource_meta );
+					$prepared_resources[] = array(
+						'resource'      => $resource[0],
+						'resource_meta' => $resource_meta,
+					);
 				}
 			}
 
@@ -149,12 +152,14 @@ class WC_Booking_Helper_Export extends WC_Bookings_Helper_Utils {
 				}
 			}
 
-			$prepared_json = json_encode( array(
-				'product'      => $product[0],
-				'product_meta' => $product_meta,
-				'resources'    => $prepared_resources,
-				'persons'      => $prepared_persons,
-			) );
+			$prepared_json = wp_json_encode(
+				array(
+					'product'      => $product[0],
+					'product_meta' => $product_meta,
+					'resources'    => $prepared_resources,
+					'persons'      => $prepared_persons,
+				)
+			);
 
 			$this->trigger_download( $prepared_json, 'booking-product-' . $product_id );
 		} catch ( Exception $e ) {
@@ -165,4 +170,4 @@ class WC_Booking_Helper_Export extends WC_Bookings_Helper_Utils {
 	}
 }
 
-new WC_Booking_Helper_Export();
+new WC_Bookings_Helper_Export();
