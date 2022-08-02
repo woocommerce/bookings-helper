@@ -1,0 +1,11 @@
+/node_modules/
+.DS_Store
+.vscode
+/languages/
+
+# Ignore all log files except for .htaccess
+/logs/*
+!/logs/.htaccess
+
+/vendor/
+composer.lock
