@@ -6,8 +6,12 @@
  * Description: This extension is a WooCommerce Bookings helper which helps you to troubleshoot bookings setup easier by allowing you to quickly export/import product settings.
  * Author: WooCommerce
  * Author URI: https://woocommerce.com
- * Requires at least: 4.7.0
- * Tested up to: 5.4.0
+ * Text Domain: bookings-helper
+ * Domain Path: /languages
+ * Tested up to: 6.0.1
+ * Requires at least: 5.6
+ * WC tested up to: 6.3
+ * WC requires at least: 6.0
  *
  * @package WordPress
  * @author WooCommerce
