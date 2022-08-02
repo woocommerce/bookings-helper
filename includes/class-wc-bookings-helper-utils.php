@@ -55,9 +55,6 @@ class WC_Bookings_Helper_Utils {
 	/**
 	 * Prints notices.
 	 *
-	 * @param string $message
-	 * @param string $type
-	 *
 	 * @since 1.0.0
 	 * @version 1.0.0
 	 */
@@ -101,8 +98,10 @@ class WC_Bookings_Helper_Utils {
 	 * @param string $filename
 	 * @param JSON string $data | Data to be zipped
 	 *
-	 * @since 1.0.2
+	 * @return bool
 	 * @version 1.0.2
+	 *
+	 * @since 1.0.2
 	 */
 	public function create_zip( $filename, $data = false ) {
 		$zip_file = $this->temp_dir . '/' . $filename . '.zip';
@@ -125,8 +124,9 @@ class WC_Bookings_Helper_Utils {
 	 * @param string $data
 	 * @param string $prefix
 	 *
-	 * @since 1.0.0
+	 * @throws Exception
 	 * @version 1.0.0
+	 * @since 1.0.0
 	 */
 	public function trigger_download( $data = '', $prefix = '' ) {
 		if ( empty( $data ) ) {
@@ -176,8 +176,9 @@ class WC_Bookings_Helper_Utils {
 	/**
 	 * Opens the zip file.
 	 *
-	 * @since 1.0.2
+	 * @throws Exception
 	 * @version 1.0.2
+	 * @since 1.0.2
 	 */
 	public function open_zip() {
 		$zip = new ZipArchive();
@@ -215,13 +216,14 @@ class WC_Bookings_Helper_Utils {
 	 *
 	 * @since 1.0.2
 	 * @version 1.0.2
+	 *
+	 * @return bool|void
 	 */
 	public function prep_transfer() {
 		if ( ! is_dir( $this->temp_dir ) ) {
 			return mkdir( $this->temp_dir );
 		}
 	}
-
 
 	/**
 	 * Renders the HTTP headers
