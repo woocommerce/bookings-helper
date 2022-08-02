@@ -56,7 +56,6 @@ if ( ! class_exists( 'Bookings_Helper' ) ) {
 		 * Load Classes.
 		 */
 		public function includes() {
-			require_once WC_BOOKINGS_HELPER_ABSPATH . 'includes/wc-bookings-helper-functions.php';
 			require_once WC_BOOKINGS_HELPER_ABSPATH . 'includes/class-wc-bookings-helper-utils.php';
 			require_once WC_BOOKINGS_HELPER_ABSPATH . 'includes/class-wc-bookings-helper-export.php';
 			require_once WC_BOOKINGS_HELPER_ABSPATH . 'includes/class-wc-bookings-helper-import.php';
@@ -89,103 +88,14 @@ if ( ! class_exists( 'Bookings_Helper' ) ) {
 		 * @version 1.0.0
 		 */
 		public function tool_page() {
-			$ziparchive_available = class_exists( 'ZipArchive' );
-			$file_label           = $ziparchive_available ? 'ZIP' : 'JSON';
-			?>
-            <div class="wrap">
-                <h1>Bookings Helper</h1>
-                <hr/>
-                <div>
-                    <h3>Global Availability Rules</h3>
-					<?php
-					$action_url = add_query_arg( array( 'page' => 'bookings-helper' ), admin_url( 'tools.php' ) );
-					?>
-                    <form action="<?php echo $action_url; ?>" method="post" style="margin-bottom:20px;border:1px solid #ccc;padding:5px;">
-                        <table>
-                            <tr>
-                                <td>
-                                    <input type="submit" class="button" value="Export Rules"/> <label>Exports all global availability rules.</label>
-                                    <input type="hidden" name="action" value="export_globals"/>
-									<?php wp_nonce_field( 'export_globals' ); ?>
-                                </td>
-                            </tr>
-                        </table>
-                    </form>
-
-					<?php
-					$action_url = add_query_arg( array( 'page' => 'bookings-helper' ), admin_url( 'tools.php' ) );
-					?>
-                    <form enctype="multipart/form-data" action="<?php echo $action_url; ?>" method="post" style="margin-bottom:20px;border:1px solid #ccc;padding:5px;">
-                        <table>
-                            <tr>
-                                <td>
-                                    <label>Choose a file (<?php echo $file_label; ?>).</label><input type="file" name="import"/>
-                                </td>
-                            </tr>
-
-                            <tr>
-                                <td>
-                                    <input type="submit" class="button" value="Import Rules"/> <label>Imports global availability rules replacing your current rules.</label>
-                                    <input type="hidden" name="action" value="import_globals"/>
-									<?php wp_nonce_field( 'import_globals' ); ?>
-                                </td>
-                            </tr>
-                        </table>
-                    </form>
-
-                    <h3>Booking Products</h3>
-					<?php
-					$action_url = add_query_arg( array( 'page' => 'bookings-helper' ), admin_url( 'tools.php' ) );
-					?>
-                    <form action="<?php echo $action_url; ?>" method="post" style="margin-bottom:20px;border:1px solid #ccc;padding:5px;">
-                        <table>
-                            <tr>
-                                <td>
-                                    <label>Product ID: <input type="number" name="product_id" min="1"/></label>
-                                    <input type="submit" class="button" value="Export Booking Product"/> <label>Exports a specific Booking product and its settings including resources.</label>
-                                    <input type="hidden" name="action" value="export_product"/>
-									<?php wp_nonce_field( 'export_product' ); ?>
-                                </td>
-                            </tr>
-                        </table>
-                    </form>
-
-					<?php
-					$action_url = add_query_arg( array( 'page' => 'bookings-helper' ), admin_url( 'tools.php' ) );
-					?>
-                    <form enctype="multipart/form-data" action="<?php echo $action_url; ?>" method="post" style="margin-bottom:20px;border:1px solid #ccc;padding:5px;">
-                        <table>
-                            <tr>
-                                <td>
-                                    <label>Choose a file (<?php echo $file_label; ?>).</label><input type="file" name="import"/>
-                                </td>
-                            </tr>
-
-                            <tr>
-                                <td>
-                                    <input type="submit" class="button" value="Import Product"/> <label>Imports a booking product.</label>
-                                    <input type="hidden" name="action" value="import_product"/>
-									<?php wp_nonce_field( 'import_product' ); ?>
-                                </td>
-                            </tr>
-                        </table>
-                    </form>
-                </div>
-            </div>
-			<?php
-
-			if ( ! $ziparchive_available ) {
-				echo '<div><p><strong style="color:red;">PHP ZipArchive extension is not installed. Import/Export will be in JSON format.</strong></p></div>';
-			}
+			include_once WC_BOOKINGS_HELPER_ABSPATH . 'templates/tool-page.php';
 		}
-
 	}
 
 	new Bookings_Helper();
 }
 
 add_action( 'plugins_loaded', 'woocommerce_bookings_helper_init', 10 );
-
 function woocommerce_bookings_helper_init() {
 	load_plugin_textdomain( 'bookings-helper', false, plugin_basename( dirname( __FILE__ ) ) . '/languages' );
 
@@ -196,5 +106,4 @@ function woocommerce_bookings_helper_init() {
 	}
 
 	$GLOBALS['wc_bookings'] = WC_Bookings::instance();
-
 }
