@@ -91,19 +91,47 @@ if ( ! class_exists( 'Bookings_Helper' ) ) {
 			include_once WC_BOOKINGS_HELPER_ABSPATH . 'templates/tool-page.php';
 		}
 	}
+}
+
+/**
+ * WooCommerce fallback notice.
+ *
+ * @since 1.0.4
+ */
+function woocommerce_bookings_helper_missing_wc_notice() {
+	/* translators: %s WC download URL link. */
+	echo '<div class="error"><p><strong>' . sprintf( esc_html__( 'Bookings Helper plugin requires WooCommerce to be installed and active. You can download %s here.', 'woocommerce-bookings' ), '<a href="https://woocommerce.com/" target="_blank">WooCommerce</a>' ) . '</strong></p></div>';
+}
+
+/**
+ * WooCommerce Bookings fallback notice.
+ *
+ * @since 1.0.4
+ */
+function woocommerce_bookings_helper_missing_bookings_notice() {
+	/* translators: %s WC download URL link. */
+	echo '<div class="error"><p><strong>' . sprintf( esc_html__( 'Bookings Helper plugin requires WooCommerce Bookings to be installed and active. You can download %s here.', 'woocommerce-bookings' ), '<a href="https://woocommerce.com/products/woocommerce-bookings/" target="_blank">WooCommerce Bookings</a>' ) . '</strong></p></div>';
+}
+
+/**
+ * Init function for the language directory.
+ */
+function woocommerce_bookings_helper_init() {
+	load_plugin_textdomain( 'bookings-helper', false, plugin_basename( dirname( __FILE__ ) ) . '/languages' );
+
+	if ( ! class_exists( 'WooCommerce' ) ) {
+		add_action( 'admin_notices', 'woocommerce_bookings_helper_missing_wc_notice' );
+
+		return;
+	}
+
+	if ( ! class_exists( 'WC_Bookings' ) ) {
+		add_action( 'admin_notices', 'woocommerce_bookings_helper_missing_bookings_notice' );
+
+		return;
+	}
 
 	new Bookings_Helper();
 }
 
 add_action( 'plugins_loaded', 'woocommerce_bookings_helper_init', 10 );
-function woocommerce_bookings_helper_init() {
-	load_plugin_textdomain( 'bookings-helper', false, plugin_basename( dirname( __FILE__ ) ) . '/languages' );
-
-	if ( ! class_exists( 'WooCommerce' ) ) {
-		add_action( 'admin_notices', 'woocommerce_bookings_missing_wc_notice' );
-
-		return;
-	}
-
-	$GLOBALS['wc_bookings'] = WC_Bookings::instance();
-}
