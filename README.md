@@ -3,6 +3,12 @@ This extension is a WooCommerce Bookings helper which helps you to troubleshoot 
 
 All exports will be in JSON file format zipped.
 
+# Minimum Version Requirements
+
+* WordPress 5.6
+* WooCommerce 6.0
+* PHP 7.2
+
 # Global Availability Rules
 
 Importing global availability rules will overwrite all the rules. This is because a bookable product test case will depend on these rules. Since this is an overwriting feature, you can first export the global availability rules for safe keeping before you import your test rules. This way you can always import back your original rules.
