@@ -32,7 +32,7 @@ $file_label           = $ziparchive_available ? 'ZIP' : 'JSON';
                 <table>
                     <tr>
                         <td>
-                            <label><?php echo __( 'Choose a file', 'bookings-helper' ) ?> (<?php echo $file_label; ?>).</label><input type="file" name="import"/>
+                            <label><?php echo __( 'Choose a file', 'bookings-helper' ) ?> (<?php echo esc_html( $file_label ); ?>).</label><input type="file" name="import"/>
                         </td>
                     </tr>
 
@@ -70,7 +70,7 @@ $file_label           = $ziparchive_available ? 'ZIP' : 'JSON';
                 <table>
                     <tr>
                         <td>
-                            <label><?php echo __( 'Choose a file' ) ?>(<?php echo esc_html( $file_label ); ?>).</label><input type="file" name="import"/>
+                            <label><?php echo __( 'Choose a file', 'bookings-helper' ) ?> (<?php echo esc_html( $file_label ); ?>).</label><input type="file" name="import"/>
                         </td>
                     </tr>
 

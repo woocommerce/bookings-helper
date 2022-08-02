@@ -38,9 +38,7 @@ class WC_Booking_Helper_Export extends WC_Bookings_Helper_Utils {
 
 		if (
 			! wp_verify_nonce( $_POST['_wpnonce'], 'export_globals' ) &&
-			! wp_verify_nonce( $_POST['_wpnonce'], 'import_globals' ) &&
-			! wp_verify_nonce( $_POST['_wpnonce'], 'export_product' ) &&
-			! wp_verify_nonce( $_POST['_wpnonce'], 'import_product' )
+			! wp_verify_nonce( $_POST['_wpnonce'], 'export_product' )
 		) {
 			wp_die( 'Cheatin&#8217; huh?' );
 		}
