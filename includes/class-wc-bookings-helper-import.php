@@ -196,8 +196,7 @@ class WC_Bookings_Helper_Import extends WC_Bookings_Helper_Utils {
 
 			// Product meta.
 			foreach ( $product['product_meta'] as $meta ) {
-//				add_post_meta( $product_id, sanitize_text_field( $meta['meta_key'] ), sanitize_text_field( $meta['meta_value'] ) );
-				$wpdb->query( $wpdb->prepare( "INSERT INTO {$wpdb->postmeta} ( post_id, meta_key, meta_value ) VALUES ( %d, %s, %s )", $product_id, sanitize_text_field( $meta['meta_key'] ), sanitize_text_field( $meta['meta_value'] ) ) );
+				add_post_meta( $product_id, sanitize_text_field( $meta['meta_key'] ), sanitize_text_field( $meta['meta_value'] ) );
 			}
 
 			$product_type = ! empty( $product['product']['type'] ) ? $product['product']['type'] : 'booking';
