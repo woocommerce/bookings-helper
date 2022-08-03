@@ -196,6 +196,7 @@ class WC_Bookings_Helper_Import extends WC_Bookings_Helper_Utils {
 
 			// Product meta.
 			foreach ( $product['product_meta'] as $meta ) {
+//				add_post_meta( $product_id, sanitize_text_field( $meta['meta_key'] ), sanitize_text_field( $meta['meta_value'] ) );
 				$wpdb->query( $wpdb->prepare( "INSERT INTO {$wpdb->postmeta} ( post_id, meta_key, meta_value ) VALUES ( %d, %s, %s )", $product_id, sanitize_text_field( $meta['meta_key'] ), sanitize_text_field( $meta['meta_value'] ) ) );
 			}
 
@@ -204,9 +205,9 @@ class WC_Bookings_Helper_Import extends WC_Bookings_Helper_Utils {
 
 			// Resources.
 			if ( ! empty( $product['resources'] ) ) {
-				$resource_base_costs      = get_post_meta( $product_id, '_resource_base_costs', true );
+				$resource_base_costs      = unserialize( get_post_meta( $product_id, '_resource_base_costs', true ) );
 				$new_resource_base_costs  = array();
-				$resource_block_costs     = get_post_meta( $product_id, '_resource_block_costs', true );
+				$resource_block_costs     = unserialize( get_post_meta( $product_id, '_resource_block_costs', true ) );
 				$new_resource_block_costs = array();
 
 				foreach ( $product['resources'] as $resource ) {
@@ -223,7 +224,7 @@ class WC_Bookings_Helper_Import extends WC_Bookings_Helper_Utils {
 					}
 
 					foreach ( $resource['resource_meta'] as $meta ) {
-						$wpdb->query( $wpdb->prepare( "INSERT INTO {$wpdb->postmeta} ( post_id, meta_key, meta_value ) VALUES ( %d, %s, %s )", $resource_id, sanitize_text_field( $meta['meta_key'] ), sanitize_text_field( $meta['meta_value'] ) ) );
+						add_post_meta( $resource_id, sanitize_text_field( $meta['meta_key'] ), sanitize_text_field( $meta['meta_value'] ) );
 					}
 
 					$new_resource_base_costs[ $resource_id ]  = ! empty( $resource_base_costs[ $resource['resource']['ID'] ] ) ? $resource_base_costs[ $resource['resource']['ID'] ] : '';
@@ -258,7 +259,7 @@ class WC_Bookings_Helper_Import extends WC_Bookings_Helper_Utils {
 					}
 
 					foreach ( $person['person_meta'] as $meta ) {
-						$wpdb->query( $wpdb->prepare( "INSERT INTO {$wpdb->postmeta} ( post_id, meta_key, meta_value ) VALUES ( %d, %s, %s )", absint( $person_id ), sanitize_text_field( $meta['meta_key'] ), sanitize_text_field( $meta['meta_value'] ) ) );
+						add_post_meta( absint( $person_id ), sanitize_text_field( $meta['meta_key'] ), sanitize_text_field( $meta['meta_value'] ) );
 					}
 				}
 			}
