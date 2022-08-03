@@ -1,7 +1,13 @@
 # bookings-helper
-This extension is a WooCommerce Bookings helper which helps you to troubleshoot bookings setup easier by allowing you to quickly export/import product settings.
+This extension is a WooCommerce Bookings helper which helps you to troubleshoot bookings setups easier by allowing you to quickly export/import product settings.
 
 All exports will be in JSON file format zipped.
+
+# Minimum Version Requirements
+
+* WordPress 5.6
+* WooCommerce 6.0
+* PHP 7.0
 
 # Global Availability Rules
 

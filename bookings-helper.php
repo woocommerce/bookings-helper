@@ -6,8 +6,12 @@
  * Description: This extension is a WooCommerce Bookings helper which helps you to troubleshoot bookings setup easier by allowing you to quickly export/import product settings.
  * Author: WooCommerce
  * Author URI: https://woocommerce.com
- * Requires at least: 4.7.0
- * Tested up to: 5.4.0
+ * Text Domain: bookings-helper
+ * Domain Path: /languages
+ * Tested up to: 6.0.1
+ * Requires at least: 5.6
+ * WC tested up to: 6.3
+ * WC requires at least: 6.0
  *
  * @package WordPress
  * @author WooCommerce
@@ -17,7 +21,18 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+if ( ! defined( 'WC_BOOKINGS_ABSPATH' ) ) {
+	define( 'WC_BOOKINGS_HELPER_ABSPATH', dirname( __FILE__ ) . '/' );
+}
+
 if ( ! class_exists( 'Bookings_Helper' ) ) {
+
+	define( 'WC_BOOKINGS_HELPER_VERSION', '1.0.4' );
+	define( 'WC_BOOKINGS_HELPER_TEMPLATE_PATH', untrailingslashit( plugin_dir_path( __FILE__ ) ) . '/templates/' );
+	define( 'WC_BOOKINGS_HELPER_PLUGIN_URL', untrailingslashit( plugins_url( '/', __FILE__ ) ) );
+	define( 'WC_BOOKINGS_HELPER_PLUGIN_PATH', untrailingslashit( plugin_dir_path( __FILE__ ) ) );
+	define( 'WC_BOOKINGS_HELPER_MAIN_FILE', __FILE__ );
+
 	/**
 	 * Main class.
 	 *
@@ -27,42 +42,23 @@ if ( ! class_exists( 'Bookings_Helper' ) ) {
 	 */
 	class Bookings_Helper {
 		/**
-		 * Temporary directory path.
-		 *
-		 * @since 1.0.2
-		 * @version 1.0.2
-		 * @var
-		 */
-		public $temp_dir;
-
-		/**
-		 * Notices.
-		 *
-		 * @since 1.0.0
-		 * @version 1.0.0
-		 * @var
-		 */
-		public $notice;
-
-		/**
-		 * Checks to see if ZipArchive library exists.
-		 *
-		 * @since 1.0.2
-		 * @version 1.0.2
-		 * @var
-		 */
-		public $ziparchive_available;
-
-		/**
 		 * Constructor.
 		 *
 		 * @since 1.0.0
 		 * @version 1.0.2
 		 */
 		public function __construct() {
-			$this->temp_dir              = get_temp_dir() . 'bookings-helper';
-			$this->ziparchive_available  = class_exists( 'ZipArchive' ) ? true : false;
+			$this->includes();
 			$this->init();
+		}
+
+		/**
+		 * Load Classes.
+		 */
+		public function includes() {
+			require_once WC_BOOKINGS_HELPER_ABSPATH . 'includes/class-wc-bookings-helper-utils.php';
+			require_once WC_BOOKINGS_HELPER_ABSPATH . 'includes/class-wc-bookings-helper-export.php';
+			require_once WC_BOOKINGS_HELPER_ABSPATH . 'includes/class-wc-bookings-helper-import.php';
 		}
 
 		/**
@@ -73,7 +69,6 @@ if ( ! class_exists( 'Bookings_Helper' ) ) {
 		 */
 		public function init() {
 			add_action( 'admin_menu', array( $this, 'add_submenu_page' ) );
-			add_action( 'init', array( $this, 'catch_requests' ), 20 );
 		}
 
 		/**
@@ -93,676 +88,50 @@ if ( ! class_exists( 'Bookings_Helper' ) ) {
 		 * @version 1.0.0
 		 */
 		public function tool_page() {
-			if ( ! empty( $this->notice ) ) {
-				echo $this->notice;
-			}
-
-			$file_label = $this->ziparchive_available ? 'ZIP' : 'JSON';
-			?>
-			<div class="wrap">
-				<h1>Bookings Helper</h1>
-				<hr />
-				<div>
-					<h3>Global Availability Rules</h3>
-					<?php
-					$action_url = add_query_arg( array( 'page' => 'bookings-helper' ), admin_url( 'tools.php' ) );
-					?>
-					<form action="<?php echo $action_url; ?>" method="post" style="margin-bottom:20px;border:1px solid #ccc;padding:5px;">
-						<table>
-							<tr>
-								<td>
-									<input type="submit" class="button" value="Export Rules" /> <label>Exports all global availability rules.</label>
-									<input type="hidden" name="action" value="export_globals" />
-									<?php wp_nonce_field( 'export_globals' ); ?>
-								</td>
-							</tr>
-						</table>
-					</form>
-
-					<?php
-					$action_url = add_query_arg( array( 'page' => 'bookings-helper' ), admin_url( 'tools.php' ) );
-					?>
-					<form enctype="multipart/form-data" action="<?php echo $action_url; ?>" method="post" style="margin-bottom:20px;border:1px solid #ccc;padding:5px;">
-						<table>
-							<tr>
-								<td>
-									<label>Choose a file (<?php echo $file_label; ?>).</label><input type="file" name="import" />
-								</td>
-							</tr>
-
-							<tr>
-								<td>
-									<input type="submit" class="button" value="Import Rules" /> <label>Imports global availability rules replacing your current rules.</label>
-									<input type="hidden" name="action" value="import_globals" />
-									<?php wp_nonce_field( 'import_globals' ); ?>
-								</td>
-							</tr>
-						</table>
-					</form>
-
-					<h3>Booking Products</h3>
-					<?php
-					$action_url = add_query_arg( array( 'page' => 'bookings-helper' ), admin_url( 'tools.php' ) );
-					?>
-					<form action="<?php echo $action_url; ?>" method="post" style="margin-bottom:20px;border:1px solid #ccc;padding:5px;">
-						<table>
-							<tr>
-								<td>
-									<label>Product ID: <input type="number" name="product_id" min="1" /></label>
-									<input type="submit" class="button" value="Export Booking Product" /> <label>Exports a specific Booking product and its settings including resources.</label>
-									<input type="hidden" name="action" value="export_product" />
-									<?php wp_nonce_field( 'export_product' ); ?>
-								</td>
-							</tr>
-						</table>
-					</form>
-
-					<?php
-					$action_url = add_query_arg( array( 'page' => 'bookings-helper' ), admin_url( 'tools.php' ) );
-					?>
-					<form enctype="multipart/form-data" action="<?php echo $action_url; ?>" method="post" style="margin-bottom:20px;border:1px solid #ccc;padding:5px;">
-						<table>
-							<tr>
-								<td>
-									<label>Choose a file (<?php echo $file_label; ?>).</label><input type="file" name="import" />
-								</td>
-							</tr>
-
-							<tr>
-								<td>
-									<input type="submit" class="button" value="Import Product" /> <label>Imports a booking product.</label>
-									<input type="hidden" name="action" value="import_product" />
-									<?php wp_nonce_field( 'import_product' ); ?>
-								</td>
-							</tr>
-						</table>
-					</form>	
-				</div>
-			</div>
-			<?php
-
-			if ( ! $this->ziparchive_available ) {
-				echo '<div><p><strong style="color:red;">PHP ZipArchive extension is not installed. Import/Export will be in JSON format.</strong></p></div>';
-			}
+			include_once WC_BOOKINGS_HELPER_ABSPATH . 'templates/tool-page.php';
 		}
-
-		/**
-		 * Catches form requests.
-		 *
-		 * @since 1.0.0
-		 * @version 1.0.0
-		 */
-		public function catch_requests() {
-			if ( ! isset( $_GET['page'] ) || 'bookings-helper' !== $_GET['page'] ) {
-				return;
-			}
-
-			if ( ! isset( $_POST['action'] ) || ! isset( $_POST['_wpnonce'] ) ) {
-				return;
-			}
-
-			if (
-				'export_globals' !== $_POST['action'] &&
-				'import_globals' !== $_POST['action'] &&
-				'export_product' !== $_POST['action'] &&
-				'import_product' !== $_POST['action']
-			) {
-				return;
-			}
-
-			if (
-				! wp_verify_nonce( $_POST['_wpnonce'], 'export_globals' ) &&
-				! wp_verify_nonce( $_POST['_wpnonce'], 'import_globals' ) &&
-				! wp_verify_nonce( $_POST['_wpnonce'], 'export_product' ) &&
-				! wp_verify_nonce( $_POST['_wpnonce'], 'import_product' )
-			) {
-				wp_die( 'Cheatin&#8217; huh?' );
-			}
-
-			switch ( $_POST['action'] ) {
-				case 'export_globals':
-					$this->export_global_rules();
-					break;
-				
-				case 'import_globals':
-					$this->import_global_rules();
-					break;
-				
-				case 'export_product':
-					$this->export_product();
-					break;
-				
-				case 'import_product':
-					$this->import_product();
-					break;
-			}
-		}
-
-		/**
-		 * Prepares the directory for file transfer.
-		 *
-		 * @since 1.0.2
-		 * @version 1.0.2
-		 */
-		public function prep_transfer() {
-			if ( ! is_dir( $this->temp_dir ) ) {
-				return mkdir( $this->temp_dir );
-			}
-		}
-
-		/**
-		 * Cleans up lingering files and folder during transfer.
-		 *
-		 * @since 1.0.2
-		 * @version 1.0.2
-		 */
-		public function clean_up( $path = null ) {
-			if ( null === $path ) {
-				$path = $this->temp_dir;
-			}
-
-			if ( is_dir( $path ) ) {
-				$objects = scandir( $path );
-
-				foreach ( $objects as $object ) {
-					if ( '.' !== $object && '..' !== $object ) {
-						if ( is_dir( $path . '/' . $object ) ) {
-							$this->clean_up( $path . '/' . $object );
-						} else {
-							unlink( $path . '/' . $object );
-						}
-					}
-				}
-
-				rmdir( $path );
-			}
-		}
-
-		/**
-		 * Creates the zip file.
-		 *
-		 * @since 1.0.2
-		 * @version 1.0.2
-		 * @param JSON string $data | Data to be zipped
-		 * @param string $filename
-		 */
-		public function create_zip( $data = false, $filename ) {
-			$zip_file = $this->temp_dir . '/' . $filename . '.zip';
-
-			$zip = new ZipArchive();
-			$zip->open( $zip_file, ZIPARCHIVE::CREATE | ZIPARCHIVE::OVERWRITE );
-			$zip->addFromString( $filename . '.json', $data );
-			$zip->close();
-
-			if ( file_exists( $this->temp_dir . '/' . $filename . '.zip' ) ) {
-				return true;
-			}
-
-			return false;
-		}
-
-		/**
-		 * Opens the zip file.
-		 *
-		 * @since 1.0.2
-		 * @version 1.0.2
-		 */
-		public function open_zip() {
-			$zip = new ZipArchive();
-
-			if ( true === $zip->open( $_FILES['import']['tmp_name'] ) ) {
-				$zip->extractTo( $this->temp_dir );
-				$zip->close();
-
-				$dir       = scandir( $this->temp_dir );
-				$json_file = '';
-
-				/**
-				 * The zip may or may not contain other hidden
-				 * system files so we must only extract the .json file.
-				 */
-				foreach ( $dir as $file ) {
-					if ( preg_match( '/.json/', $file ) ) {
-						$json_file = $file;
-						break;
-					}
-				}
-
-				if ( ! file_exists( $this->temp_dir . '/' . $json_file ) ) {
-					throw new Exception( 'Unable to open zip file' );
-				}
-
-				return file_get_contents( $this->temp_dir . '/' . $json_file );
-			} else {
-				throw new Exception( 'Unable to open zip file' );
-			}
-		}
-
-		/**
-		 * Renders the HTTP headers
-		 *
-		 * @since 1.0.2
-		 * @version 1.0.2
-		 * @param string $filename | Path to file
-		 */
-		public function render_headers( $filename ) {
-			$type = 'json';
-
-			if ( $this->ziparchive_available ) {
-				$type = 'zip';
-			}
-
-			header( 'Content-Type: application/' . $type . '; charset=UTF-8' );
-			header( 'Content-Disposition: attachment; filename=' . $filename . '.' . $type );
-			header( 'Pragma: no-cache' );
-			header( 'Expires: 0' );
-		}
-
-		/**
-		 * Triggers the download feature of the browser.
-		 *
-		 * @since 1.0.0
-		 * @version 1.0.0
-		 * @param string $data
-		 * @param string $prefix
-		 */
-		public function trigger_download( $data = '', $prefix = '' ) {
-			if ( empty( $data ) ) {
-				return;
-			}
-
-			@set_time_limit(0);
-
-			// Disable GZIP
-			if ( function_exists( 'apache_setenv' ) ) {
-				@apache_setenv( 'no-gzip', 1 );
-			}
-
-			@ini_set( 'zlib.output_compression', 'Off' );
-			@ini_set( 'output_buffering', 'Off' );
-			@ini_set( 'output_handler', '' );
-
-			$filename_prefix = $prefix;
-
-			if ( $this->ziparchive_available ) {
-				$filename = sprintf( '%1$s-%2$s', $filename_prefix, date( 'Y-m-d', current_time( 'timestamp' ) ) );
-
-				$this->prep_transfer();
-
-				$this->render_headers( $filename );
-
-				if ( $this->create_zip( $data, $filename ) ) {
-					readfile( $this->temp_dir . '/' . $filename . '.zip' );
-
-					$this->clean_up();
-
-					exit;
-				} else {
-					throw new Exception( 'Unable to export!' );
-				}
-			} else {
-				$filename = sprintf( '%1$s-%2$s.json', $filename_prefix, date( 'Y-m-d', current_time( 'timestamp' ) ) );
-
-				$this->render_headers( $filename );
-
-				file_put_contents( 'php://output', $data );
-
-				exit;
-			}
-		}
-
-		/**
-		 * Exports global availability rules file for browser download.
-		 *
-		 * @since 1.0.0
-		 * @param 1.0.0
-		 */
-		public function export_global_rules() {
-			try {
-				if ( version_compare( WC_BOOKINGS_VERSION, '1.13.0', '<' ) ) {
-					$global_rules = get_option( 'wc_global_booking_availability', array() );
-				} else {
-					$global_rules = WC_Data_Store::load( 'booking-global-availability' )->get_all_as_array();
-				}
-
-				if ( empty( $global_rules ) ) {
-					throw new Exception( 'There are no rules to export.' );					
-				}
-
-				$global_rules_json = json_encode( $global_rules );
-
-				$this->trigger_download( $global_rules_json, 'bookings-global-rules' );
-			} catch ( Exception $e ) {
-				$this->print_notice( $e->getMessage() );
-
-				return;
-			}
-		}
-
-		/**
-		 * Imports global availability rules from file.
-		 *
-		 * @since 1.0.3 Add compatibility with Bookings custom global availability tables.
-		 */
-		public function import_global_rules() {
-			try {
-				if ( empty( $_FILES ) || empty( $_FILES['import'] ) || 0 !== $_FILES['import']['error'] || empty( $_FILES['import']['tmp_name'] ) ) {
-					throw new Exception( 'There are no rules to import or file is not valid.' );
-				} else {
-					if ( $_FILES['import']['size'] > 1000000 ) {
-						throw new Exception( 'The file exceeds 1MB.' );
-					}
-
-					if ( $this->ziparchive_available ) {
-						$global_rules_json = $this->open_zip();
-					} else {
-						$global_rules_json = file_get_contents( $_FILES['import']['tmp_name'] );
-					}
-
-					if ( ! $this->is_json( $global_rules_json ) ) {
-						throw new Exception( 'The file is not in a valid JSON format.' );
-					}
-				}
-
-				$global_rules = json_decode( $global_rules_json, true );
-
-				// Sanitize.
-				array_walk_recursive( $global_rules, 'wc_clean' );
-
-				if ( version_compare( WC_BOOKINGS_VERSION, '1.13.0', '<' ) ) {
-					/*
-					 * For some strange reason update_option is not working here so
-					 * had to revert to delete the option and add it again.
-					 */
-					delete_option( 'wc_global_booking_availability' );
-					add_option( 'wc_global_booking_availability', $global_rules );
-				} else {
-					global $wpdb;
-
-					// First delete all data from table.
-					$wpdb->query( "TRUNCATE TABLE {$wpdb->prefix}wc_bookings_availability" );
-
-					foreach ( $global_rules as $rule ) {
-						$wpdb->insert(
-							$wpdb->prefix . 'wc_bookings_availability',
-							array(
-								'gcal_event_id' => ! empty( $rule['gcal_event_id'] ) ? $rule['gcal_event_id'] : '',
-								'title'         => $rule['title'],
-								'range_type'    => $rule['range_type'],
-								'from_date'     => $rule['from_date'],
-								'to_date'       => $rule['to_date'],
-								'from_range'    => $rule['from_range'],
-								'to_range'      => $rule['to_range'],
-								'bookable'      => $rule['bookable'],
-								'priority'      => $rule['priority'],
-								'ordering'      => $rule['ordering'],
-								'date_created'  => $rule['date_created'],
-								'date_modified' => $rule['date_modified'],
-								'rrule'         => ! empty( $rule['rrule'] ) ? $rule['rrule'] : '',
-							),
-							array(
-								'%s',
-								'%s',
-								'%s',
-								'%s',
-								'%s',
-								'%s',
-								'%s',
-								'%s',
-								'%d',
-								'%d',
-								'%s',
-								'%s',
-							)
-						);
-					}
-				}
-
-				$this->print_notice( 'Global Availability Rules imported successfully!', 'success' );
-				$this->clean_up();
-
-				return;
-			} catch ( Exception $e ) {
-				$this->print_notice( $e->getMessage() );
-
-				return;
-			}
-		}
-
-		/**
-		 * Exports a specific product by ID.
-		 *
-		 * @since 1.0.0
-		 * @version 1.0.1
-		 */
-		public function export_product() {
-			try {
-				$product_id     = isset( $_POST['product_id'] ) ? absint( $_POST['product_id'] ) : '';
-				$product_status = get_post_status( $product_id );
-				
-				if ( empty( $product_id ) || empty( $product_status ) ) {
-					throw new Exception( 'This booking product does not exist!' );
-				}
-
-				global $wpdb;
-
-				// Products.
-				$product = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$wpdb->posts} WHERE post_type = 'product' AND ID = %d", $product_id ), ARRAY_A );
-
-				// Get the type of the product, accomm or booking.
-				$product_type       = wp_get_post_terms( $product[0]['ID'], 'product_type' );
-				$product[0]['type'] = $product_type[0]->name;
-
-				if ( empty( $product ) ) {
-					throw new Exception( 'This booking product does not exist!' );
-				}
-
-				// Product metas.
-				$product_meta = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$wpdb->postmeta} WHERE post_id = %d AND ( meta_key LIKE '%%wc_booking%%' OR meta_key = '_resource_base_costs' OR meta_key = '_resource_block_costs' OR meta_key = '_wc_display_cost' OR meta_key = '_virtual' )", $product_id ), ARRAY_A );
-
-				if ( empty( $product_meta ) ) {
-					throw new Exception( 'This booking product does not exist!' );
-				}
-
-				// Booking relationships ( resources ).
-				$resources = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}wc_booking_relationships WHERE product_id = %d", $product_id ), ARRAY_A );
-
-				$prepared_resources = array();
-				$prepared_persons   = array();
-
-				// If resources exists, we need to extract the meta
-				// information for each resource.
-				if ( ! empty( $resources ) ) {
-					foreach ( $resources as $key => $value ) {
-						$resource = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$wpdb->posts} WHERE post_type = 'bookable_resource' AND ID = %d", $value['resource_id'] ), ARRAY_A );
-
-						if ( ! empty( $resource ) ) {
-							$resource_meta = $wpdb->get_results( $wpdb->prepare( "SELECT meta_key, meta_value FROM {$wpdb->postmeta} WHERE post_id = %d AND ( meta_key = 'qty' OR meta_key = '_wc_booking_availability' )", $value['resource_id'] ), ARRAY_A );
-						}
-
-						$prepared_resources[] = array( 'resource' => $resource[0], 'resource_meta' => $resource_meta );
-					}
-				}
-
-				// Persons.
-				$persons = $wpdb->get_results( $wpdb->prepare( "SELECT ID, post_title, post_excerpt FROM {$wpdb->posts} WHERE post_type = 'bookable_person' AND post_parent = %d", $product_id ), ARRAY_A );
-
-				if ( ! empty( $persons ) ) {
-					foreach ( $persons as $person ) {
-						$person_meta = $wpdb->get_results( $wpdb->prepare( "SELECT meta_key, meta_value FROM {$wpdb->postmeta} WHERE post_id = %d", $person['ID'] ), ARRAY_A );
-
-						$prepared_persons[] = array( 'person' => $person, 'person_meta' => $person_meta );
-					}
-				}
-
-				$prepared_json = json_encode( array( 
-					'product'      => $product[0], 
-					'product_meta' => $product_meta,
-					'resources'    => $prepared_resources,
-					'persons'      => $prepared_persons,
-				) );
-
-				$this->trigger_download( $prepared_json, 'booking-product-' . $product_id );
-			} catch ( Exception $e ) {
-				$this->print_notice( $e->getMessage() );
-
-				return;
-			}
-		}
-
-		/**
-		 * Imports booking product from file.
-		 *
-		 * @since 1.0.0
-		 * @version 1.0.1
-		 */
-		public function import_product() {
-			try {
-				if ( empty( $_FILES ) || empty( $_FILES['import'] ) || 0 !== $_FILES['import']['error'] || empty( $_FILES['import']['tmp_name'] ) ) {
-					throw new Exception( 'There is no bookable product to import or file is not valid.' );
-				} else {
-					if ( $_FILES['import']['size'] > 1000000 ) {
-						throw new Exception( 'The file exceeds 1MB.' );
-					}
-
-					if ( $this->ziparchive_available ) {
-						$product_json = $this->open_zip();
-					} else {
-						$product_json = file_get_contents( $_FILES['import']['tmp_name'] );
-					}
-
-					if ( ! $this->is_json( $product_json ) ) {
-						throw new Exception( 'The file is not in a valid JSON format.' );
-					}
-				}
-
-				$product = json_decode( $product_json, true );
-
-				// Sanitize.
-				array_walk_recursive( $product, 'wc_clean' );
-
-				global $wpdb;
-
-				// Product.
-				$product_data = array( 
-					'post_title'   => sanitize_text_field( $product['product']['post_title'] ) . ' (bookings test #' . absint( $product['product']['ID'] ) . ')',
-					'post_content' => sanitize_text_field( $product['product']['post_content'] ),
-					'post_type'    => 'product',
-					'post_status'  => 'publish',
-				);
-
-				$product_id = wp_insert_post( $product_data, false );
-
-				if ( empty( $product_id ) ) {
-					throw new Exception( 'Failed to create product.' );
-				}
-
-				// Product meta.
-				foreach ( $product['product_meta'] as $meta ) {
-					$wpdb->query( $wpdb->prepare( "INSERT INTO {$wpdb->postmeta} ( post_id, meta_key, meta_value ) VALUES ( %d, %s, %s )", $product_id, sanitize_text_field( $meta['meta_key'] ), sanitize_text_field( $meta['meta_value'] ) ) );
-				}
-
-				$product_type = ! empty( $product['product']['type'] ) ? $product['product']['type'] : 'booking';
-				wp_set_object_terms( $product_id, $product_type, 'product_type' );
-
-				// Resources.
-				if ( ! empty( $product['resources'] ) ) {
-					$resource_base_costs      = get_post_meta( $product_id, '_resource_base_costs', true );
-					$new_resource_base_costs  = array();
-					$resource_block_costs     = get_post_meta( $product_id, '_resource_block_costs', true );
-					$new_resource_block_costs = array();
-
-					foreach ( $product['resources'] as $resource ) {
-						$resource_data = array( 
-							'post_title'  => sanitize_text_field( $resource['resource']['post_title'] ) . ' (resource test #' . absint( $resource['resource']['ID'] ) . ')',
-							'post_type'   => 'bookable_resource',
-							'post_status' => 'publish',
-						);
-
-						$resource_id = wp_insert_post( $resource_data, false );
-
-						if ( empty( $resource_id ) ) {
-							throw new Exception( 'Failed to create resource.' );
-						}
-
-						foreach ( $resource['resource_meta'] as $meta ) {
-							$wpdb->query( $wpdb->prepare( "INSERT INTO {$wpdb->postmeta} ( post_id, meta_key, meta_value ) VALUES ( %d, %s, %s )", $resource_id, sanitize_text_field( $meta['meta_key'] ), sanitize_text_field( $meta['meta_value'] ) ) );		
-						}
-
-						$new_resource_base_costs[ $resource_id ]  = ! empty( $resource_base_costs[ $resource['resource']['ID'] ] ) ? $resource_base_costs[ $resource['resource']['ID'] ] : '';
-						$new_resource_block_costs[ $resource_id ] = ! empty( $resource_block_costs[ $resource['resource']['ID'] ] ) ? $resource_block_costs[ $resource['resource']['ID'] ] : '';
-						$wpdb->query( $wpdb->prepare( "INSERT INTO {$wpdb->prefix}wc_booking_relationships ( product_id, resource_id ) VALUES ( %d, %d )", $product_id, $resource_id ) );
-					}
-
-					if ( ! empty( $new_resource_base_costs ) ) {
-						update_post_meta( $product_id, '_resource_base_costs', $new_resource_base_costs );
-					}
-
-					if ( ! empty( $new_resource_block_costs ) ) {
-						update_post_meta( $product_id, '_resource_block_costs', $new_resource_block_costs );
-					}
-				}
-
-				// Persons.
-				if ( ! empty( $product['persons'] ) ) {
-					foreach ( $product['persons'] as $person ) {
-						$person_data = array( 
-							'post_title'  => sanitize_text_field( $person['person']['post_title'] ) . ' (person test #' . absint( $person['person']['ID'] ) . ')',
-							'post_type'   => 'bookable_person',
-							'post_status' => 'publish',
-							'post_parent' => absint( $product_id ),
-							'post_excerpt' => sanitize_text_field( $person['person']['post_excerpt'] ),
-						);
-
-						$person_id = wp_insert_post( $person_data, false );
-
-						if ( empty( $person_id ) ) {
-							throw new Exception( 'Failed to create person.' );
-						}
-
-						foreach ( $person['person_meta'] as $meta ) {
-							$wpdb->query( $wpdb->prepare( "INSERT INTO {$wpdb->postmeta} ( post_id, meta_key, meta_value ) VALUES ( %d, %s, %s )", absint( $person_id ), sanitize_text_field( $meta['meta_key'] ), sanitize_text_field( $meta['meta_value'] ) ) );		
-						}
-					}
-				}
-
-				$this->print_notice( 'Booking Product imported successfully!', 'success' );
-				$this->clean_up();
-
-				return;
-			} catch ( Exception $e ) {
-				$this->print_notice( $e->getMessage() );
-
-				return;
-			}
-		}
-
-		/**
-		 * Checks if string is valid JSON.
-		 *
-		 * @since 1.0.0
-		 * @version 1.0.0
-		 * @param string $string
-		 * @return bool
-		 */
-		public function is_json( $string = '' ) {
-			json_decode( $string );
-			
-			return ( JSON_ERROR_NONE === json_last_error() );
-		}
-
-		/**
-		 * Prints notices.
-		 *
-		 * @since 1.0.0
-		 * @version 1.0.0
-		 * @param string $message
-		 * @param string $type
-		 */
-		public function print_notice( $message = '', $type = 'warning' ) {
-			$this->notice = '<div class="notice notice-' . esc_attr( $type ) . '"><p>' . esc_html( $message ) . '</p></div>';
-		}
+	}
+}
+
+/**
+ * WooCommerce fallback notice.
+ *
+ * @since 1.0.4
+ */
+function woocommerce_bookings_helper_missing_wc_notice() {
+	/* translators: %s WC download URL link. */
+	echo '<div class="error"><p><strong>' . sprintf( esc_html__( 'Bookings Helper plugin requires WooCommerce to be installed and active. You can download %s here.', 'woocommerce-bookings' ), '<a href="https://woocommerce.com/" target="_blank">WooCommerce</a>' ) . '</strong></p></div>';
+}
+
+/**
+ * WooCommerce Bookings fallback notice.
+ *
+ * @since 1.0.4
+ */
+function woocommerce_bookings_helper_missing_bookings_notice() {
+	/* translators: %s WC download URL link. */
+	echo '<div class="error"><p><strong>' . sprintf( esc_html__( 'Bookings Helper plugin requires WooCommerce Bookings to be installed and active. You can download %s here.', 'woocommerce-bookings' ), '<a href="https://woocommerce.com/products/woocommerce-bookings/" target="_blank">WooCommerce Bookings</a>' ) . '</strong></p></div>';
+}
+
+/**
+ * Init function for the language directory.
+ */
+function woocommerce_bookings_helper_init() {
+	load_plugin_textdomain( 'bookings-helper', false, plugin_basename( dirname( __FILE__ ) ) . '/languages' );
+
+	if ( ! class_exists( 'WooCommerce' ) ) {
+		add_action( 'admin_notices', 'woocommerce_bookings_helper_missing_wc_notice' );
+
+		return;
+	}
+
+	if ( ! class_exists( 'WC_Bookings' ) ) {
+		add_action( 'admin_notices', 'woocommerce_bookings_helper_missing_bookings_notice' );
+
+		return;
 	}
 
 	new Bookings_Helper();
 }
+
+add_action( 'plugins_loaded', 'woocommerce_bookings_helper_init', 10 );
