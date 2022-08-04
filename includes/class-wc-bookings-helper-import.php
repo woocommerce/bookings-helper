@@ -60,24 +60,28 @@ class WC_Bookings_Helper_Import extends WC_Bookings_Helper_Utils {
 	 * @since 1.0.3 Add compatibility with Bookings custom global availability tables.
 	 * @throws Exception Show error if file isn't valid.
 	 */
-	public function import_global_rules() {
+	public function import_global_rules( $global_rules_form_product_zip = '' ) {
 		try {
-			if ( empty( $_FILES ) || empty( $_FILES['import'] ) || 0 !== $_FILES['import']['error'] || empty( $_FILES['import']['tmp_name'] ) ) {
-				throw new Exception( __( 'There are no rules to import or file is not valid.', 'bookings-helper' ) );
-			} else {
-				if ( $_FILES['import']['size'] > 1000000 ) {
-					throw new Exception( __( 'The file exceeds 1MB.', 'bookings-helper' ) );
-				}
-
-				if ( $this->ziparchive_available ) {
-					$global_rules_json = $this->open_zip();
+			if ( empty( $global_rules_form_product_zip ) ) {
+				if ( empty( $_FILES ) || empty( $_FILES['import'] ) || 0 !== $_FILES['import']['error'] || empty( $_FILES['import']['tmp_name'] ) ) {
+					throw new Exception( __( 'There are no rules to import or file is not valid.', 'bookings-helper' ) );
 				} else {
-					$global_rules_json = file_get_contents( $_FILES['import']['tmp_name'] );
-				}
+					if ( $_FILES['import']['size'] > 1000000 ) {
+						throw new Exception( __( 'The file exceeds 1MB.', 'bookings-helper' ) );
+					}
 
-				if ( ! $this->is_json( $global_rules_json ) ) {
-					throw new Exception( __( 'The file is not in a valid JSON format.', 'bookings-helper' ) );
+					if ( $this->ziparchive_available ) {
+						$global_rules_json = $this->open_zip();
+					} else {
+						$global_rules_json = file_get_contents( $_FILES['import']['tmp_name'] );
+					}
+
+					if ( ! $this->is_json( $global_rules_json ) ) {
+						throw new Exception( __( 'The file is not in a valid JSON format.', 'bookings-helper' ) );
+					}
 				}
+			} else {
+				$global_rules_json = $global_rules_form_product_zip;
 			}
 
 			$global_rules = json_decode( $global_rules_json, true );
@@ -132,6 +136,10 @@ class WC_Bookings_Helper_Import extends WC_Bookings_Helper_Utils {
 						)
 					);
 				}
+			}
+
+			if( ! empty( $global_rules_form_product_zip ) ) {
+				return;
 			}
 
 			$this->wc_bookings_helper_prepare_notice( __( 'Global Availability Rules imported successfully!', 'bookings-helper' ), 'success' );
@@ -263,7 +271,15 @@ class WC_Bookings_Helper_Import extends WC_Bookings_Helper_Utils {
 				}
 			}
 
-			$this->wc_bookings_helper_prepare_notice( __( 'Booking Product imported successfully!', 'bookings-helper' ), 'success' );
+			$success_message = __( 'Booking Product imported successfully!', 'bookings-helper' );
+
+			// Import Global rules.
+			if ( isset( $_POST['include_global_rules'] ) && ! empty( $product['global_rules'] ) ) {
+				$this->import_global_rules( $product['global_rules'] );
+				$success_message = __( 'Booking Product and Global rules imported successfully!', 'bookings-helper' );
+			}
+
+			$this->wc_bookings_helper_prepare_notice( esc_html( $success_message ) , 'success' );
 			$this->clean_up();
 
 			return;
