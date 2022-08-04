@@ -59,6 +59,7 @@ class WC_Bookings_Helper_Import extends WC_Bookings_Helper_Utils {
 	 *
 	 * @since 1.0.3 Add compatibility with Bookings custom global availability tables.
 	 * @throws Exception Show error if file isn't valid.
+	 * @param string $global_rules_form_product_zip Global rules to import.
 	 */
 	public function import_global_rules( $global_rules_form_product_zip = '' ) {
 		try {
@@ -138,7 +139,7 @@ class WC_Bookings_Helper_Import extends WC_Bookings_Helper_Utils {
 				}
 			}
 
-			if( ! empty( $global_rules_form_product_zip ) ) {
+			if ( ! empty( $global_rules_form_product_zip ) ) {
 				return;
 			}
 
@@ -152,7 +153,6 @@ class WC_Bookings_Helper_Import extends WC_Bookings_Helper_Utils {
 			return;
 		}
 	}
-
 
 	/**
 	 * Imports booking product from file.
@@ -204,7 +204,7 @@ class WC_Bookings_Helper_Import extends WC_Bookings_Helper_Utils {
 
 			// Product meta.
 			foreach ( $product['product_meta'] as $meta ) {
-				// Skip Double serialization.
+				// Skip double serialization.
 				if ( is_serialized( $meta['meta_value'] ) ) {
 					$wpdb->query( $wpdb->prepare( "INSERT INTO {$wpdb->postmeta} ( post_id, meta_key, meta_value ) VALUES ( %d, %s, %s )", $product_id, sanitize_text_field( $meta['meta_key'] ), sanitize_text_field( $meta['meta_value'] ) ) );
 				} else {
@@ -278,13 +278,13 @@ class WC_Bookings_Helper_Import extends WC_Bookings_Helper_Utils {
 
 			$success_message = __( 'Booking Product imported successfully!', 'bookings-helper' );
 
-			// Import Global rules.
+			// Import global rules.
 			if ( isset( $_POST['include_global_rules'] ) && ! empty( $product['global_rules'] ) ) {
 				$this->import_global_rules( $product['global_rules'] );
 				$success_message = __( 'Booking Product and Global rules imported successfully!', 'bookings-helper' );
 			}
 
-			$this->wc_bookings_helper_prepare_notice( esc_html( $success_message ) , 'success' );
+			$this->wc_bookings_helper_prepare_notice( esc_html( $success_message ), 'success' );
 			$this->clean_up();
 
 			return;

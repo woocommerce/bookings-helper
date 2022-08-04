@@ -74,12 +74,12 @@ $file_label           = $ziparchive_available ? 'ZIP' : 'JSON';
 							<label><?php esc_html_e( 'Choose a file', 'bookings-helper' ); ?> (<?php echo esc_html( $file_label ); ?>).</label><input type="file" name="import"/>
 						</td>
 					</tr>
-                    <tr>
-                        <td>
-                            <input type="checkbox" id="include_global_rules" name="include_global_rules" style="margin:10px 0;"/>
-                            <label for="include_global_rules"><?php esc_html_e( 'Also import Global rules.', 'bookings-helper' ); ?></label>
-                        </td>
-                    </tr>
+					<tr>
+						<td>
+							<input type="checkbox" id="include_global_rules" name="include_global_rules" style="margin:10px 0;"/>
+							<label for="include_global_rules"><?php esc_html_e( 'Import global availability rules (if your ZIP contains those) replacing your current rules.', 'bookings-helper' ); ?></label>
+						</td>
+					</tr>
 					<tr>
 						<td>
 							<input type="submit" class="button" value="<?php esc_attr_e( 'Import Product', 'bookings-helper' ); ?>"/> <label><?php esc_html_e( 'Imports a booking product.', 'bookings-helper' ); ?></label>
