@@ -236,7 +236,8 @@ class WC_Bookings_Helper_Import extends WC_Bookings_Helper_Utils {
 					}
 
 					foreach ( $resource['resource_meta'] as $meta ) {
-						add_post_meta( $resource_id, sanitize_text_field( $meta['meta_key'] ), sanitize_text_field( $meta['meta_value'] ) );
+						$meta_value = maybe_unserialize( sanitize_text_field( $meta['meta_value'] ) );
+						add_post_meta( $resource_id, sanitize_text_field( $meta['meta_key'] ), $meta_value );
 					}
 
 					$new_resource_base_costs[ $resource_id ]  = ! empty( $resource_base_costs[ $resource['resource']['ID'] ] ) ? $resource_base_costs[ $resource['resource']['ID'] ] : '';
