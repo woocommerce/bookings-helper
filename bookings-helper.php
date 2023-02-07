@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name: Bookings Helper
- * Version: 1.0.3
+ * Version: 1.0.5
  * Plugin URI: https://github.com/woocommerce/bookings-helper
  * Description: This extension is a WooCommerce Bookings helper which helps you to troubleshoot bookings setup easier by allowing you to quickly export/import product settings.
  * Author: WooCommerce
