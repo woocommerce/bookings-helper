@@ -20,8 +20,8 @@
   },
   "autoload": {
     "files": [
-      "includes/wp-cli-commands/class-wc-bookings-helper-products-export-command.php",
-      "includes/wp-cli-commands/class-wc-bookings-helper-availability-rules-export-command.php"
+      "includes/wp-cli-commands/class-wc-bookings-helper-products-command.php",
+      "includes/wp-cli-commands/class-wc-bookings-helper-availability-rules-command.php"
     ]
   },
   "archive": {

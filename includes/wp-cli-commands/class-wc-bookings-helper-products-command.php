@@ -1,6 +1,6 @@
 <?php
 /**
- * The WP CLI command for exporting bookings.
+ * he WP CLI command for handle commands for booking products.
  *
  * @package Bookings Helper/ WP CLI commands
  * @since   x.x.x
@@ -12,7 +12,7 @@ use WP_CLI\ExitException;
  * Class WC_Bookings_Export_Command
  * @since x.x.x
  */
-class WC_Bookings_Helper_Products_Export_Command {
+class WC_Bookings_Helper_Products_Command extends WP_CLI_Command {
 	/**
 	 * Exports booking products.
 	 *
@@ -39,7 +39,7 @@ class WC_Bookings_Helper_Products_Export_Command {
 	 * @return void
 	 * @throws ExitException
 	 */
-	public function __invoke( $args, $assoc_args ) {
+	public function export( $args, $assoc_args ) {
 		// Export all booking products.
 		if ( ! empty( $assoc_args['all'] ) ) {
 			// Default path is wp-content/uploads.
