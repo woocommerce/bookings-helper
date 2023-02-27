@@ -14,6 +14,7 @@ if ( ! class_exists( 'WP_CLI_Command' ) ) {
 
 /**
  * Class WC_Bookings_Helper_Availability_Rules_Command
+ *
  * @since x.x.x
  */
 class WC_Bookings_Helper_Availability_Rules_Command extends WP_CLI_Command {

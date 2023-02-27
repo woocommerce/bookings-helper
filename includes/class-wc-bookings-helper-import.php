@@ -67,8 +67,12 @@ class WC_Bookings_Helper_Import extends WC_Bookings_Helper_Utils {
 		try {
 			if ( empty( $global_rules_form_product_zip ) ) {
 				if ( empty( $_FILES ) || empty( $_FILES['import'] ) || 0 !== $_FILES['import']['error'] || empty( $_FILES['import']['tmp_name'] ) ) {
-					throw new Exception( __( 'There are no rules to import or file is not valid.',
-						'bookings-helper' ) );
+					throw new Exception(
+						__(
+							'There are no rules to import or file is not valid.',
+							'bookings-helper'
+						)
+					);
 				} else {
 					if ( $_FILES['import']['size'] > 1000000 ) {
 						throw new Exception( __( 'The file exceeds 1MB.', 'bookings-helper' ) );
@@ -94,9 +98,13 @@ class WC_Bookings_Helper_Import extends WC_Bookings_Helper_Utils {
 				return;
 			}
 
-			$this->wc_bookings_helper_prepare_notice( __( 'Global Availability Rules imported successfully!',
-				'bookings-helper' ),
-				'success' );
+			$this->wc_bookings_helper_prepare_notice(
+				__(
+					'Global Availability Rules imported successfully!',
+					'bookings-helper'
+				),
+				'success'
+			);
 			$this->clean_up();
 
 			return;
@@ -117,8 +125,12 @@ class WC_Bookings_Helper_Import extends WC_Bookings_Helper_Utils {
 	public function import_product() {
 		try {
 			if ( empty( $_FILES ) || empty( $_FILES['import'] ) || 0 !== $_FILES['import']['error'] || empty( $_FILES['import']['tmp_name'] ) ) {
-				throw new Exception( __( 'There is no bookable product to import or file is not valid.',
-					'bookings-helper' ) );
+				throw new Exception(
+					__(
+						'There is no bookable product to import or file is not valid.',
+						'bookings-helper'
+					)
+				);
 			} else {
 				if ( $_FILES['import']['size'] > 1000000 ) {
 					throw new Exception( __( 'The file exceeds 1MB.', 'bookings-helper' ) );
@@ -135,7 +147,7 @@ class WC_Bookings_Helper_Import extends WC_Bookings_Helper_Utils {
 				}
 			}
 
-			$this->import_product_from_json($product_json);
+			$this->import_product_from_json( $product_json );
 
 			$success_message = __( 'Booking Product imported successfully!', 'bookings-helper' );
 
@@ -257,14 +269,20 @@ class WC_Bookings_Helper_Import extends WC_Bookings_Helper_Utils {
 		foreach ( $product['product_meta'] as $meta ) {
 			// Skip double serialization.
 			if ( is_serialized( $meta['meta_value'] ) ) {
-				$wpdb->query( $wpdb->prepare( "INSERT INTO {$wpdb->postmeta} ( post_id, meta_key, meta_value ) VALUES ( %d, %s, %s )",
+				$wpdb->query(
+					$wpdb->prepare(
+						"INSERT INTO {$wpdb->postmeta} ( post_id, meta_key, meta_value ) VALUES ( %d, %s, %s )",
+						$product_id,
+						sanitize_text_field( $meta['meta_key'] ),
+						sanitize_text_field( $meta['meta_value'] )
+					)
+				);
+			} else {
+				add_post_meta(
 					$product_id,
 					sanitize_text_field( $meta['meta_key'] ),
-					sanitize_text_field( $meta['meta_value'] ) ) );
-			} else {
-				add_post_meta( $product_id,
-					sanitize_text_field( $meta['meta_key'] ),
-					sanitize_text_field( $meta['meta_value'] ) );
+					sanitize_text_field( $meta['meta_value'] )
+				);
 			}
 		}
 
@@ -298,9 +316,13 @@ class WC_Bookings_Helper_Import extends WC_Bookings_Helper_Utils {
 
 				$new_resource_base_costs[ $resource_id ]  = ! empty( $resource_base_costs[ $resource['resource']['ID'] ] ) ? $resource_base_costs[ $resource['resource']['ID'] ] : '';
 				$new_resource_block_costs[ $resource_id ] = ! empty( $resource_block_costs[ $resource['resource']['ID'] ] ) ? $resource_block_costs[ $resource['resource']['ID'] ] : '';
-				$wpdb->query( $wpdb->prepare( "INSERT INTO {$wpdb->prefix}wc_booking_relationships ( product_id, resource_id ) VALUES ( %d, %d )",
-					$product_id,
-					$resource_id ) );
+				$wpdb->query(
+					$wpdb->prepare(
+						"INSERT INTO {$wpdb->prefix}wc_booking_relationships ( product_id, resource_id ) VALUES ( %d, %d )",
+						$product_id,
+						$resource_id
+					)
+				);
 			}
 
 			if ( ! empty( $new_resource_base_costs ) ) {
@@ -330,9 +352,11 @@ class WC_Bookings_Helper_Import extends WC_Bookings_Helper_Utils {
 				}
 
 				foreach ( $person['person_meta'] as $meta ) {
-					add_post_meta( absint( $person_id ),
+					add_post_meta(
+						absint( $person_id ),
 						sanitize_text_field( $meta['meta_key'] ),
-						sanitize_text_field( $meta['meta_value'] ) );
+						sanitize_text_field( $meta['meta_value'] )
+					);
 				}
 			}
 		}

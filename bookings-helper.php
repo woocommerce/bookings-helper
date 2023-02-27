@@ -54,6 +54,7 @@ if ( ! class_exists( 'Bookings_Helper' ) ) {
 
 		/**
 		 * Load Classes.
+		 *
 		 * @throws Exception
 		 */
 		public function includes() {

@@ -14,6 +14,7 @@ if ( ! class_exists( 'WP_CLI_Command' ) ) {
 
 /**
  * Class WC_Bookings_Export_Command
+ *
  * @since x.x.x
  */
 class WC_Bookings_Helper_Products_Command extends WP_CLI_Command {
@@ -59,7 +60,8 @@ class WC_Bookings_Helper_Products_Command extends WP_CLI_Command {
 		try {
 			$name_prefix = sprintf(
 				'booking-product-%s',
-				date( 'Y-m-d',
+				date(
+					'Y-m-d',
 					current_time( 'timestamp' )
 				)
 			);
@@ -72,7 +74,7 @@ class WC_Bookings_Helper_Products_Command extends WP_CLI_Command {
 			$zip->open( $zip_file_path, ZipArchive::CREATE | ZipArchive::OVERWRITE );
 
 			// Get booking products data in json format.
-			if( $assoc_args['products'] ) {
+			if ( $assoc_args['products'] ) {
 				$product_ids = array_map( 'absint', explode( ',', $assoc_args['products'] ) );
 
 				foreach ( $product_ids as $product_id ) {
@@ -80,7 +82,7 @@ class WC_Bookings_Helper_Products_Command extends WP_CLI_Command {
 				}
 
 				$export_data = wp_json_encode( $booking_products_data );
-			} else{
+			} else {
 				$export_data = ( new WC_Bookings_Helper_Export() )->get_all_booking_products_data();
 			}
 
@@ -152,13 +154,13 @@ class WC_Bookings_Helper_Products_Command extends WP_CLI_Command {
 
 		$products = json_decode( $products, true );
 
-		try{
+		try {
 			// Add support: user should be able to import data exported from WP Dashboard.
 			// convert data to new format.
-			if( array_key_exists('product', $products) ){
-				$temp_products = [];
-				$temp_products[$products['product']['ID']] = wp_json_encode($products);
-				$products = $temp_products;
+			if ( array_key_exists( 'product', $products ) ) {
+				$temp_products                               = array();
+				$temp_products[ $products['product']['ID'] ] = wp_json_encode( $products );
+				$products                                    = $temp_products;
 			}
 
 			foreach ( $products as $product ) {

@@ -182,7 +182,8 @@ class WC_Bookings_Helper_Export extends WC_Bookings_Helper_Utils {
 						WHERE post_type = 'bookable_resource'
 						  AND ID = %d
 						  ",
-						$value['resource_id'] ),
+						$value['resource_id']
+					),
 					ARRAY_A
 				);
 
@@ -195,8 +196,10 @@ class WC_Bookings_Helper_Export extends WC_Bookings_Helper_Utils {
 							WHERE post_id = %d
 							AND ( meta_key = 'qty' OR meta_key = '_wc_booking_availability' )
 							",
-							$value['resource_id'] ),
-						ARRAY_A );
+							$value['resource_id']
+						),
+						ARRAY_A
+					);
 				}
 
 				$prepared_resources[] = array(
@@ -234,7 +237,10 @@ class WC_Bookings_Helper_Export extends WC_Bookings_Helper_Utils {
 					ARRAY_A
 				);
 
-				$prepared_persons[] = array( 'person' => $person, 'person_meta' => $person_meta );
+				$prepared_persons[] = array(
+					'person'      => $person,
+					'person_meta' => $person_meta,
+				);
 			}
 		}
 
