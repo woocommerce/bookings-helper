@@ -3,7 +3,7 @@ name: PHPCS
 on:
   pull_request:
     branches:
-      - trunk
+      - master
 
 jobs:
   changed:
