@@ -16,6 +16,21 @@ class WC_Bookings_Export_Command {
 	/**
 	 * Exports booking products.
 	 *
+	 * ## OPTIONS
+	 * <--all>
+	 * : Whether or not export all booking products
+	 *
+	 * <--dir=<absolute_path_to_dir>>
+	 * : The directory path to export the booking products
+	 * ---
+	 * default: wp-content/uploads
+	 * value: path/to/export
+	 * ---
+	 *
+	 * ## EXAMPLES
+	 * wp booking-helper export --all
+	 * wp booking-helper export --all --dir=/path/to/export
+	 *
 	 * @since x.x.x
 	 *
 	 * @param array $args       Subcommand args.
@@ -28,9 +43,9 @@ class WC_Bookings_Export_Command {
 		// Export all booking products.
 		if ( ! empty( $assoc_args['all'] ) ) {
 			// Default path is wp-content/uploads.
-			$directory_path = empty( $assoc_args['path'] ) ?
+			$directory_path = empty( $assoc_args['dir'] ) ?
 				trailingslashit( WP_CONTENT_DIR ) . 'uploads' :
-				$assoc_args['path'];
+				$assoc_args['dir'];
 
 			try {
 				$name_prefix   = sprintf(
@@ -45,13 +60,20 @@ class WC_Bookings_Export_Command {
 
 				// Create zip;
 				$zip = new ZipArchive();
-				$zip->open( $zip_file_path, ZipArchive::CREATE );
+				$zip->open( $zip_file_path, ZipArchive::CREATE | ZipArchive::OVERWRITE );
+
 				$zip->addFromString(
 					$json_file_name,
 					// Get json data for all booking products.
 					( new WC_Bookings_Helper_Export() )->get_all_booking_products_data()
 				);
+
 				$zip->close();
+
+				if( $zip->open( $zip_file_path ) !== true ) {
+					WP_CLI::error( 'Booking products export failed.' );
+					return;
+				}
 
 				WP_CLI::success( "Booking products exported. Location: $zip_file_path" );
 			} catch ( Exception $e ) {
