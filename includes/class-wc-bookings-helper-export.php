@@ -17,7 +17,7 @@ class WC_Bookings_Helper_Export extends WC_Bookings_Helper_Utils {
 	/**
 	 * Catches form requests.
 	 *
-	 * @since 1.0.0
+	 * @since   1.0.0
 	 * @version 1.0.0
 	 */
 	public function catch_export_requests() {
@@ -85,9 +85,9 @@ class WC_Bookings_Helper_Export extends WC_Bookings_Helper_Utils {
 	/**
 	 * Exports a specific product by ID.
 	 *
-	 * @since 1.0.0
-	 * @version 1.0.1
+	 * @since   1.0.0
 	 * @throws Exception Show error if no product exists.
+	 * @version 1.0.1
 	 */
 	public function export_product() {
 		try {
@@ -265,9 +265,9 @@ class WC_Bookings_Helper_Export extends WC_Bookings_Helper_Utils {
 	 * Note: this function returns data in json format.
 	 *
 	 * @since x.x.x
-	 * @throws RuntimeException
+	 * @throws Exception|RuntimeException
 	 */
-	public function get_all_booking_products_data(): string{
+	public function get_all_booking_products_data(): string {
 		global $wpdb;
 
 		$product_ids = $wpdb->get_col(
@@ -276,15 +276,23 @@ class WC_Bookings_Helper_Export extends WC_Bookings_Helper_Utils {
 			$wpdb->term_relationships AS tr
 			INNER JOIN $wpdb->terms AS t ON tr.term_taxonomy_id = t.term_id
 			WHERE t.slug IN('booking', 'accommodation-booking')
-			",
-			ARRAY_A
+			"
 		);
 
-		if( ! $product_ids ) {
+		if ( ! $product_ids ) {
 			throw new \RuntimeException( esc_html__( 'No booking products found!', 'bookings-helper' ) );
 		}
 
-		return $this->get_booking_product_data(73);
+		// Convert product ids to int.
+		$product_ids = array_map( 'intval', $product_ids );
+
+		$booking_products_data = array();
+
+		foreach ( $product_ids as $product_id ) {
+			$booking_products_data[ $product_id ] = $this->get_booking_product_data( $product_id );
+		}
+
+		return wp_json_encode( $booking_products_data );
 	}
 }
 
