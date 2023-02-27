@@ -60,9 +60,6 @@ if ( ! class_exists( 'Bookings_Helper' ) ) {
 			require_once WC_BOOKINGS_HELPER_ABSPATH . 'includes/class-wc-bookings-helper-utils.php';
 			require_once WC_BOOKINGS_HELPER_ABSPATH . 'includes/class-wc-bookings-helper-export.php';
 			require_once WC_BOOKINGS_HELPER_ABSPATH . 'includes/class-wc-bookings-helper-import.php';
-
-			// WP CLI commands.
-			require_once WC_BOOKINGS_HELPER_ABSPATH . 'includes/wp-cli-commands/class-wc-bookings-export-command.php';
 		}
 
 		/**

@@ -8,6 +8,10 @@
 
 use WP_CLI\ExitException;
 
+if( ! class_exists( 'WP_CLI_Command' ) ) {
+	return;
+}
+
 /**
  * Class WC_Bookings_Export_Command
  * @since x.x.x
@@ -20,7 +24,7 @@ class WC_Bookings_Helper_Products_Command extends WP_CLI_Command {
 	 * <--all>
 	 * : Whether or not export all booking products
 	 *
-	 * <--dir=<absolute_path_to_dir>>
+	 * [--dir=<absolute_path_to_dir>]
 	 * : The directory path to export the booking products
 	 * ---
 	 * default: wp-content/uploads
@@ -28,8 +32,8 @@ class WC_Bookings_Helper_Products_Command extends WP_CLI_Command {
 	 * ---
 	 *
 	 * ## EXAMPLES
-	 * wp booking-helper export --all
-	 * wp booking-helper export --all --dir=/path/to/export
+	 * wp booking-helper-products export --all
+	 * wp booking-helper-products export --all --dir=/path/to/export
 	 *
 	 * @since x.x.x
 	 *
@@ -39,7 +43,7 @@ class WC_Bookings_Helper_Products_Command extends WP_CLI_Command {
 	 * @return void
 	 * @throws ExitException
 	 */
-	public function export( $args, $assoc_args ) {
+	public function export( array $args, array $assoc_args ) {
 		// Export all booking products.
 		if ( ! empty( $assoc_args['all'] ) ) {
 			// Default path is wp-content/uploads.
@@ -48,14 +52,14 @@ class WC_Bookings_Helper_Products_Command extends WP_CLI_Command {
 				$assoc_args['dir'];
 
 			try {
-				$name_prefix   = sprintf(
+				$name_prefix = sprintf(
 					'booking-product-%s',
 					date( 'Y-m-d',
 						current_time( 'timestamp' )
 					)
 				);
 
-				$zip_file_path = "$directory_path/$name_prefix.zip";
+				$zip_file_path  = "$directory_path/$name_prefix.zip";
 				$json_file_name = "$name_prefix.json";
 
 				// Create zip;
@@ -70,8 +74,9 @@ class WC_Bookings_Helper_Products_Command extends WP_CLI_Command {
 
 				$zip->close();
 
-				if( $zip->open( $zip_file_path ) !== true ) {
+				if ( $zip->open( $zip_file_path ) !== true ) {
 					WP_CLI::error( 'Booking products export failed.' );
+
 					return;
 				}
 

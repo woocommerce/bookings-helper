@@ -62,19 +62,7 @@ class WC_Bookings_Helper_Export extends WC_Bookings_Helper_Utils {
 	 */
 	public function export_global_rules() {
 		try {
-			if ( version_compare( WC_BOOKINGS_VERSION, '1.13.0', '<' ) ) {
-				$global_rules = get_option( 'wc_global_booking_availability', array() );
-			} else {
-				$global_rules = WC_Data_Store::load( 'booking-global-availability' )->get_all_as_array();
-			}
-
-			if ( empty( $global_rules ) ) {
-				throw new Exception( __( 'There are no rules to export.', 'bookings-helper' ) );
-			}
-
-			$global_rules_json = wp_json_encode( $global_rules );
-
-			$this->trigger_download( $global_rules_json, 'bookings-global-rules' );
+			$this->trigger_download( $this->get_global_availability_rules(), 'bookings-global-rules' );
 		} catch ( Exception $e ) {
 			$this->wc_bookings_helper_prepare_notice( $e->getMessage() );
 
@@ -280,7 +268,7 @@ class WC_Bookings_Helper_Export extends WC_Bookings_Helper_Utils {
 		);
 
 		if ( ! $product_ids ) {
-			throw new \RuntimeException( esc_html__( 'No booking products found!', 'bookings-helper' ) );
+			throw new RuntimeException( esc_html__( 'No booking products found!', 'bookings-helper' ) );
 		}
 
 		// Convert product ids to int.
@@ -293,6 +281,29 @@ class WC_Bookings_Helper_Export extends WC_Bookings_Helper_Utils {
 		}
 
 		return wp_json_encode( $booking_products_data );
+	}
+
+	/**
+	 * Get all global availability rules.
+	 *
+	 * @since x.x.x
+	 *
+	 * @return string
+	 *
+	 * @throws Exception
+	 */
+	public function get_global_availability_rules(): string {
+		if ( version_compare( WC_BOOKINGS_VERSION, '1.13.0', '<' ) ) {
+			$global_rules = get_option( 'wc_global_booking_availability', array() );
+		} else {
+			$global_rules = WC_Data_Store::load( 'booking-global-availability' )->get_all_as_array();
+		}
+
+		if ( empty( $global_rules ) ) {
+			throw new RuntimeException( __( 'There are no rules to export.', 'bookings-helper' ) );
+		}
+
+		return wp_json_encode( $global_rules );
 	}
 }
 
