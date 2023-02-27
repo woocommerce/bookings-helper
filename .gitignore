@@ -8,6 +8,5 @@
 !/logs/.htaccess
 
 /vendor/
-composer.lock
 
 /.idea
