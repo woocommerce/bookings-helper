@@ -98,68 +98,7 @@ class WC_Bookings_Helper_Export extends WC_Bookings_Helper_Utils {
 				throw new Exception( __( 'This booking product does not exist!', 'bookings-helper' ) );
 			}
 
-			global $wpdb;
-
-			// Products.
-			$product = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$wpdb->posts} WHERE post_type = 'product' AND ID = %d", $product_id ), ARRAY_A );
-
-			if ( empty( $product ) ) {
-				throw new Exception( __( 'This booking product does not exist!', 'bookings-helper' ) );
-			}
-
-			// Get the type of the product, accomm or booking.
-			$product_type       = wp_get_post_terms( $product[0]['ID'], 'product_type' );
-			$product[0]['type'] = $product_type[0]->name;
-
-			// Product metas.
-			$product_meta = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$wpdb->postmeta} WHERE post_id = %d AND ( meta_key LIKE '%%wc_booking%%' OR meta_key = '_resource_base_costs' OR meta_key = '_resource_block_costs' OR meta_key = '_wc_display_cost' OR meta_key = '_virtual' )", $product_id ), ARRAY_A );
-
-			if ( empty( $product_meta ) ) {
-				throw new Exception( __( 'This booking product does not exist!', 'bookings-helper' ) );
-			}
-
-			// Booking relationships ( resources ).
-			$resources = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}wc_booking_relationships WHERE product_id = %d", $product_id ), ARRAY_A );
-
-			$prepared_resources = array();
-			$prepared_persons   = array();
-
-			// If resources exists, we need to extract the meta
-			// information for each resource.
-			if ( ! empty( $resources ) ) {
-				foreach ( $resources as $key => $value ) {
-					$resource = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$wpdb->posts} WHERE post_type = 'bookable_resource' AND ID = %d", $value['resource_id'] ), ARRAY_A );
-
-					if ( ! empty( $resource ) ) {
-						$resource_meta = $wpdb->get_results( $wpdb->prepare( "SELECT meta_key, meta_value FROM {$wpdb->postmeta} WHERE post_id = %d AND ( meta_key = 'qty' OR meta_key = '_wc_booking_availability' )", $value['resource_id'] ), ARRAY_A );
-					}
-
-					$prepared_resources[] = array(
-						'resource'      => $resource[0],
-						'resource_meta' => $resource_meta,
-					);
-				}
-			}
-
-			// Persons.
-			$persons = $wpdb->get_results( $wpdb->prepare( "SELECT ID, post_title, post_excerpt FROM {$wpdb->posts} WHERE post_type = 'bookable_person' AND post_parent = %d", $product_id ), ARRAY_A );
-
-			if ( ! empty( $persons ) ) {
-				foreach ( $persons as $person ) {
-					$person_meta = $wpdb->get_results( $wpdb->prepare( "SELECT meta_key, meta_value FROM {$wpdb->postmeta} WHERE post_id = %d", $person['ID'] ), ARRAY_A );
-
-					$prepared_persons[] = array( 'person' => $person, 'person_meta' => $person_meta );
-				}
-			}
-
-			$prepared_json = wp_json_encode(
-				array(
-					'product'      => $product[0],
-					'product_meta' => $product_meta,
-					'resources'    => $prepared_resources,
-					'persons'      => $prepared_persons,
-				)
-			);
+			$prepared_json = $this->get_booking_product_data( $product_id );
 
 			$this->trigger_download( $prepared_json, 'booking-product-' . $product_id );
 		} catch ( Exception $e ) {
@@ -167,6 +106,185 @@ class WC_Bookings_Helper_Export extends WC_Bookings_Helper_Utils {
 
 			return;
 		}
+	}
+
+	/**
+	 * Get Booking product data by id.
+	 * Note: this function returns data in json format.
+	 *
+	 * @since x.x.x
+	 *
+	 * @throws Exception
+	 * @global WPDB $wpdb
+	 */
+	public function get_booking_product_data( $product_id ): string {
+		global $wpdb;
+
+		// Products.
+		$product = $wpdb->get_results(
+			$wpdb->prepare(
+				"
+				SELECT *
+				FROM {$wpdb->posts}
+				WHERE post_type = 'product'
+				AND ID = %d
+				",
+				$product_id
+			),
+			ARRAY_A
+		);
+
+		if ( empty( $product ) ) {
+			throw new Exception( __( 'This booking product does not exist!', 'bookings-helper' ) );
+		}
+
+		// Get the type of the product, accomm or booking.
+		$product_type       = wp_get_post_terms( $product[0]['ID'], 'product_type' );
+		$product[0]['type'] = $product_type[0]->name;
+
+		// Product metas.
+		$product_meta = $wpdb->get_results(
+			$wpdb->prepare(
+				"
+				SELECT *
+				FROM {$wpdb->postmeta}
+				WHERE post_id = %d
+				AND (
+					meta_key LIKE '%%wc_booking%%' OR
+					meta_key = '_resource_base_costs' OR
+					meta_key = '_resource_block_costs' OR
+					meta_key = '_wc_display_cost' OR
+					meta_key = '_virtual'
+				)
+				",
+				$product_id
+			),
+			ARRAY_A
+		);
+
+		if ( empty( $product_meta ) ) {
+			throw new Exception( __( 'This booking product does not exist!', 'bookings-helper' ) );
+		}
+
+		// Booking relationships ( resources ).
+		$resources = $wpdb->get_results(
+			$wpdb->prepare(
+				"
+				SELECT *
+				FROM {$wpdb->prefix}wc_booking_relationships
+				WHERE product_id = %d
+				",
+				$product_id
+			),
+			ARRAY_A
+		);
+
+		$prepared_resources = array();
+		$prepared_persons   = array();
+
+		// If resources exists, we need to extract the meta
+		// information for each resource.
+		if ( ! empty( $resources ) ) {
+			foreach ( $resources as $key => $value ) {
+				$resource = $wpdb->get_results(
+					$wpdb->prepare(
+						"
+						SELECT *
+						FROM {$wpdb->posts}
+						WHERE post_type = 'bookable_resource'
+						  AND ID = %d
+						  ",
+						$value['resource_id'] ),
+					ARRAY_A
+				);
+
+				if ( ! empty( $resource ) ) {
+					$resource_meta = $wpdb->get_results(
+						$wpdb->prepare(
+							"
+							SELECT meta_key, meta_value
+							FROM {$wpdb->postmeta}
+							WHERE post_id = %d
+							AND ( meta_key = 'qty' OR meta_key = '_wc_booking_availability' )
+							",
+							$value['resource_id'] ),
+						ARRAY_A );
+				}
+
+				$prepared_resources[] = array(
+					'resource'      => $resource[0],
+					'resource_meta' => $resource_meta,
+				);
+			}
+		}
+
+		// Persons.
+		$persons = $wpdb->get_results(
+			$wpdb->prepare(
+				"
+				SELECT ID, post_title, post_excerpt
+				FROM {$wpdb->posts}
+				WHERE post_type = 'bookable_person'
+				  AND post_parent = %d
+				  ",
+				$product_id
+			),
+			ARRAY_A
+		);
+
+		if ( ! empty( $persons ) ) {
+			foreach ( $persons as $person ) {
+				$person_meta = $wpdb->get_results(
+					$wpdb->prepare(
+						"
+						SELECT meta_key, meta_value
+						FROM {$wpdb->postmeta}
+						WHERE post_id = %d
+						",
+						$person['ID']
+					),
+					ARRAY_A
+				);
+
+				$prepared_persons[] = array( 'person' => $person, 'person_meta' => $person_meta );
+			}
+		}
+
+		return wp_json_encode(
+			array(
+				'product'      => $product[0],
+				'product_meta' => $product_meta,
+				'resources'    => $prepared_resources,
+				'persons'      => $prepared_persons,
+			)
+		);
+	}
+
+	/**
+	 * Get all booking products data.
+	 * Note: this function returns data in json format.
+	 *
+	 * @since x.x.x
+	 * @throws RuntimeException
+	 */
+	public function get_all_booking_products_data(): string{
+		global $wpdb;
+
+		$product_ids = $wpdb->get_col(
+			"
+			SELECT tr.object_id FROM
+			$wpdb->term_relationships AS tr
+			INNER JOIN $wpdb->terms AS t ON tr.term_taxonomy_id = t.term_id
+			WHERE t.slug IN('booking', 'accommodation-booking')
+			",
+			ARRAY_A
+		);
+
+		if( ! $product_ids ) {
+			throw new \RuntimeException( esc_html__( 'No booking products found!', 'bookings-helper' ) );
+		}
+
+		return $this->get_booking_product_data(73);
 	}
 }
 
