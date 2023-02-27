@@ -1,8 +1,5 @@
 <?xml version="1.0"?>
 <ruleset name="WordPress Coding Standards">
-    <rule ref="Extendables">
-    </rule>
-
     <!-- Files to check -->
     <arg name="extensions" value="php"/>
     <file>.</file>
@@ -11,7 +8,27 @@
     <exclude-pattern>*/vendor/*</exclude-pattern>
     <exclude-pattern>*/tests/*</exclude-pattern>
 
-    <!-- ensure we are using language features according to supported PHP versions -->
+    <!-- Show progress, show the error codes for each message (source). -->
+    <arg value="ps"/>
+
+    <!-- Strip the filepaths in reports down to the relevant bit. -->
+    <arg name="basepath" value="./"/>
+
+    <!-- Check up to 8 files simultaneously. -->
+    <arg name="parallel" value="8"/>
+
+    <!-- Configs -->
+    <config name="minimum_supported_wp_version" value="5.6"/>
     <config name="testVersion" value="7.0-"/>
-    <rule ref="PHPCompatibilityWP" />
+
+    <!-- Rules -->
+    <rule ref="WooCommerce-Core" />
+
+    <rule ref="WordPress.WP.I18n">
+        <properties>
+            <property name="text_domain" type="array" value="woocommerce-bookings" />
+        </properties>
+    </rule>
+
+    <rule ref="PHPCompatibilityWP"/>
 </ruleset>
