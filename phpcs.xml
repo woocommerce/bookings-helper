@@ -26,7 +26,7 @@
 
     <rule ref="WordPress.WP.I18n">
         <properties>
-            <property name="text_domain" type="array" value="woocommerce-bookings" />
+            <property name="text_domain" type="array" value="bookings-helper" />
         </properties>
     </rule>
 
