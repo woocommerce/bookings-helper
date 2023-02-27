@@ -17,7 +17,7 @@ class WC_Bookings_Helper_Import extends WC_Bookings_Helper_Utils {
 	/**
 	 * Catches form requests.
 	 *
-	 * @since 1.0.0
+	 * @since   1.0.0
 	 * @version 1.0.0
 	 */
 	public function catch_import_requests() {
@@ -58,14 +58,17 @@ class WC_Bookings_Helper_Import extends WC_Bookings_Helper_Utils {
 	 * Imports global availability rules from file.
 	 *
 	 * @since 1.0.3 Add compatibility with Bookings custom global availability tables.
-	 * @throws Exception Show error if file isn't valid.
+	 *
 	 * @param string $global_rules_form_product_zip Global rules to import.
+	 *
+	 * @throws Exception Show error if file isn't valid.
 	 */
 	public function import_global_rules( $global_rules_form_product_zip = '' ) {
 		try {
 			if ( empty( $global_rules_form_product_zip ) ) {
 				if ( empty( $_FILES ) || empty( $_FILES['import'] ) || 0 !== $_FILES['import']['error'] || empty( $_FILES['import']['tmp_name'] ) ) {
-					throw new Exception( __( 'There are no rules to import or file is not valid.', 'bookings-helper' ) );
+					throw new Exception( __( 'There are no rules to import or file is not valid.',
+						'bookings-helper' ) );
 				} else {
 					if ( $_FILES['import']['size'] > 1000000 ) {
 						throw new Exception( __( 'The file exceeds 1MB.', 'bookings-helper' ) );
@@ -85,65 +88,15 @@ class WC_Bookings_Helper_Import extends WC_Bookings_Helper_Utils {
 				$global_rules_json = $global_rules_form_product_zip;
 			}
 
-			$global_rules = json_decode( $global_rules_json, true );
-
-			// Sanitize.
-			array_walk_recursive( $global_rules, 'wc_clean' );
-
-			if ( version_compare( WC_BOOKINGS_VERSION, '1.13.0', '<' ) ) {
-				/*
-				 * For some strange reason update_option is not working here so
-				 * had to revert to delete the option and add it again.
-				 */
-				delete_option( 'wc_global_booking_availability' );
-				add_option( 'wc_global_booking_availability', $global_rules );
-			} else {
-				global $wpdb;
-
-				// First delete all data from table.
-				$wpdb->query( "TRUNCATE TABLE {$wpdb->prefix}wc_bookings_availability" );
-
-				foreach ( $global_rules as $rule ) {
-					$wpdb->insert(
-						$wpdb->prefix . 'wc_bookings_availability',
-						array(
-							'gcal_event_id' => ! empty( $rule['gcal_event_id'] ) ? $rule['gcal_event_id'] : '',
-							'title'         => $rule['title'],
-							'range_type'    => $rule['range_type'],
-							'from_date'     => $rule['from_date'],
-							'to_date'       => $rule['to_date'],
-							'from_range'    => $rule['from_range'],
-							'to_range'      => $rule['to_range'],
-							'bookable'      => $rule['bookable'],
-							'priority'      => $rule['priority'],
-							'ordering'      => $rule['ordering'],
-							'date_created'  => $rule['date_created'],
-							'date_modified' => $rule['date_modified'],
-							'rrule'         => ! empty( $rule['rrule'] ) ? $rule['rrule'] : '',
-						),
-						array(
-							'%s',
-							'%s',
-							'%s',
-							'%s',
-							'%s',
-							'%s',
-							'%s',
-							'%s',
-							'%d',
-							'%d',
-							'%s',
-							'%s',
-						)
-					);
-				}
-			}
+			$this->import_rules_from_json( $global_rules_json );
 
 			if ( ! empty( $global_rules_form_product_zip ) ) {
 				return;
 			}
 
-			$this->wc_bookings_helper_prepare_notice( __( 'Global Availability Rules imported successfully!', 'bookings-helper' ), 'success' );
+			$this->wc_bookings_helper_prepare_notice( __( 'Global Availability Rules imported successfully!',
+				'bookings-helper' ),
+				'success' );
 			$this->clean_up();
 
 			return;
@@ -157,14 +110,15 @@ class WC_Bookings_Helper_Import extends WC_Bookings_Helper_Utils {
 	/**
 	 * Imports booking product from file.
 	 *
-	 * @since 1.0.0
-	 * @version 1.0.1
+	 * @since   1.0.0
 	 * @throws Exception Show error if something goes wrong.
+	 * @version 1.0.1
 	 */
 	public function import_product() {
 		try {
 			if ( empty( $_FILES ) || empty( $_FILES['import'] ) || 0 !== $_FILES['import']['error'] || empty( $_FILES['import']['tmp_name'] ) ) {
-				throw new Exception( __( 'There is no bookable product to import or file is not valid.', 'bookings-helper' ) );
+				throw new Exception( __( 'There is no bookable product to import or file is not valid.',
+					'bookings-helper' ) );
 			} else {
 				if ( $_FILES['import']['size'] > 1000000 ) {
 					throw new Exception( __( 'The file exceeds 1MB.', 'bookings-helper' ) );
@@ -206,9 +160,14 @@ class WC_Bookings_Helper_Import extends WC_Bookings_Helper_Utils {
 			foreach ( $product['product_meta'] as $meta ) {
 				// Skip double serialization.
 				if ( is_serialized( $meta['meta_value'] ) ) {
-					$wpdb->query( $wpdb->prepare( "INSERT INTO {$wpdb->postmeta} ( post_id, meta_key, meta_value ) VALUES ( %d, %s, %s )", $product_id, sanitize_text_field( $meta['meta_key'] ), sanitize_text_field( $meta['meta_value'] ) ) );
+					$wpdb->query( $wpdb->prepare( "INSERT INTO {$wpdb->postmeta} ( post_id, meta_key, meta_value ) VALUES ( %d, %s, %s )",
+						$product_id,
+						sanitize_text_field( $meta['meta_key'] ),
+						sanitize_text_field( $meta['meta_value'] ) ) );
 				} else {
-					add_post_meta( $product_id, sanitize_text_field( $meta['meta_key'] ), sanitize_text_field( $meta['meta_value'] ) );
+					add_post_meta( $product_id,
+						sanitize_text_field( $meta['meta_key'] ),
+						sanitize_text_field( $meta['meta_value'] ) );
 				}
 			}
 
@@ -236,12 +195,16 @@ class WC_Bookings_Helper_Import extends WC_Bookings_Helper_Utils {
 					}
 
 					foreach ( $resource['resource_meta'] as $meta ) {
-						add_post_meta( $resource_id, sanitize_text_field( $meta['meta_key'] ), sanitize_text_field( $meta['meta_value'] ) );
+						add_post_meta( $resource_id,
+							sanitize_text_field( $meta['meta_key'] ),
+							sanitize_text_field( $meta['meta_value'] ) );
 					}
 
 					$new_resource_base_costs[ $resource_id ]  = ! empty( $resource_base_costs[ $resource['resource']['ID'] ] ) ? $resource_base_costs[ $resource['resource']['ID'] ] : '';
 					$new_resource_block_costs[ $resource_id ] = ! empty( $resource_block_costs[ $resource['resource']['ID'] ] ) ? $resource_block_costs[ $resource['resource']['ID'] ] : '';
-					$wpdb->query( $wpdb->prepare( "INSERT INTO {$wpdb->prefix}wc_booking_relationships ( product_id, resource_id ) VALUES ( %d, %d )", $product_id, $resource_id ) );
+					$wpdb->query( $wpdb->prepare( "INSERT INTO {$wpdb->prefix}wc_booking_relationships ( product_id, resource_id ) VALUES ( %d, %d )",
+						$product_id,
+						$resource_id ) );
 				}
 
 				if ( ! empty( $new_resource_base_costs ) ) {
@@ -271,7 +234,9 @@ class WC_Bookings_Helper_Import extends WC_Bookings_Helper_Utils {
 					}
 
 					foreach ( $person['person_meta'] as $meta ) {
-						add_post_meta( absint( $person_id ), sanitize_text_field( $meta['meta_key'] ), sanitize_text_field( $meta['meta_value'] ) );
+						add_post_meta( absint( $person_id ),
+							sanitize_text_field( $meta['meta_key'] ),
+							sanitize_text_field( $meta['meta_value'] ) );
 					}
 				}
 			}
@@ -295,6 +260,70 @@ class WC_Bookings_Helper_Import extends WC_Bookings_Helper_Utils {
 		}
 	}
 
+	/**
+	 * Should import global rules from json
+	 *
+	 * @since x.x.x
+	 *
+	 * @param string $global_rules_json Global availability rules in json format.
+	 *
+	 * @return void
+	 */
+	public function import_rules_from_json( $global_rules_json ) {
+		$global_rules = json_decode( $global_rules_json, true );
+
+		// Sanitize.
+		array_walk_recursive( $global_rules, 'wc_clean' );
+
+		if ( version_compare( WC_BOOKINGS_VERSION, '1.13.0', '<' ) ) {
+			/*
+			 * For some strange reason update_option is not working here so
+			 * had to revert to delete the option and add it again.
+			 */
+			delete_option( 'wc_global_booking_availability' );
+			add_option( 'wc_global_booking_availability', $global_rules );
+		} else {
+			global $wpdb;
+
+			// First delete all data from table.
+			$wpdb->query( "TRUNCATE TABLE {$wpdb->prefix}wc_bookings_availability" );
+
+			foreach ( $global_rules as $rule ) {
+				$wpdb->insert(
+					$wpdb->prefix . 'wc_bookings_availability',
+					array(
+						'gcal_event_id' => ! empty( $rule['gcal_event_id'] ) ? $rule['gcal_event_id'] : '',
+						'title'         => $rule['title'],
+						'range_type'    => $rule['range_type'],
+						'from_date'     => $rule['from_date'],
+						'to_date'       => $rule['to_date'],
+						'from_range'    => $rule['from_range'],
+						'to_range'      => $rule['to_range'],
+						'bookable'      => $rule['bookable'],
+						'priority'      => $rule['priority'],
+						'ordering'      => $rule['ordering'],
+						'date_created'  => $rule['date_created'],
+						'date_modified' => $rule['date_modified'],
+						'rrule'         => ! empty( $rule['rrule'] ) ? $rule['rrule'] : '',
+					),
+					array(
+						'%s',
+						'%s',
+						'%s',
+						'%s',
+						'%s',
+						'%s',
+						'%s',
+						'%s',
+						'%d',
+						'%d',
+						'%s',
+						'%s',
+					)
+				);
+			}
+		}
+	}
 }
 
 new WC_Bookings_Helper_Import();
