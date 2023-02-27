@@ -153,6 +153,14 @@ class WC_Bookings_Helper_Products_Command extends WP_CLI_Command {
 		$products = json_decode( $products, true );
 
 		try{
+			// Add support: user should be able to import data exported from WP Dashboard.
+			// convert data to new format.
+			if( array_key_exists('product', $products) ){
+				$temp_products = [];
+				$temp_products[$products['product']['ID']] = wp_json_encode($products);
+				$products = $temp_products;
+			}
+
 			foreach ( $products as $product ) {
 				( new WC_Bookings_Helper_Import() )->import_product_from_json( $product );
 			}
