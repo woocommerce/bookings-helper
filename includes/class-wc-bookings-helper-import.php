@@ -135,111 +135,7 @@ class WC_Bookings_Helper_Import extends WC_Bookings_Helper_Utils {
 				}
 			}
 
-			$product = json_decode( $product_json, true );
-
-			// Sanitize.
-			array_walk_recursive( $product, 'wc_clean' );
-
-			global $wpdb;
-
-			// Product.
-			$product_data = array(
-				'post_title'   => sanitize_text_field( $product['product']['post_title'] ) . ' (bookings test #' . absint( $product['product']['ID'] ) . ')',
-				'post_content' => sanitize_text_field( $product['product']['post_content'] ),
-				'post_type'    => 'product',
-				'post_status'  => 'publish',
-			);
-
-			$product_id = wp_insert_post( $product_data, false );
-
-			if ( empty( $product_id ) ) {
-				throw new Exception( 'Failed to create product.' );
-			}
-
-			// Product meta.
-			foreach ( $product['product_meta'] as $meta ) {
-				// Skip double serialization.
-				if ( is_serialized( $meta['meta_value'] ) ) {
-					$wpdb->query( $wpdb->prepare( "INSERT INTO {$wpdb->postmeta} ( post_id, meta_key, meta_value ) VALUES ( %d, %s, %s )",
-						$product_id,
-						sanitize_text_field( $meta['meta_key'] ),
-						sanitize_text_field( $meta['meta_value'] ) ) );
-				} else {
-					add_post_meta( $product_id,
-						sanitize_text_field( $meta['meta_key'] ),
-						sanitize_text_field( $meta['meta_value'] ) );
-				}
-			}
-
-			$product_type = ! empty( $product['product']['type'] ) ? $product['product']['type'] : 'booking';
-			wp_set_object_terms( $product_id, $product_type, 'product_type' );
-
-			// Resources.
-			if ( ! empty( $product['resources'] ) ) {
-				$resource_base_costs      = get_post_meta( $product_id, '_resource_base_costs', true );
-				$new_resource_base_costs  = array();
-				$resource_block_costs     = get_post_meta( $product_id, '_resource_block_costs', true );
-				$new_resource_block_costs = array();
-
-				foreach ( $product['resources'] as $resource ) {
-					$resource_data = array(
-						'post_title'  => sanitize_text_field( $resource['resource']['post_title'] ) . ' (resource test #' . absint( $resource['resource']['ID'] ) . ')',
-						'post_type'   => 'bookable_resource',
-						'post_status' => 'publish',
-					);
-
-					$resource_id = wp_insert_post( $resource_data, false );
-
-					if ( empty( $resource_id ) ) {
-						throw new Exception( __( 'Failed to create resource.', 'bookings-helper' ) );
-					}
-
-					foreach ( $resource['resource_meta'] as $meta ) {
-						add_post_meta( $resource_id,
-							sanitize_text_field( $meta['meta_key'] ),
-							sanitize_text_field( $meta['meta_value'] ) );
-					}
-
-					$new_resource_base_costs[ $resource_id ]  = ! empty( $resource_base_costs[ $resource['resource']['ID'] ] ) ? $resource_base_costs[ $resource['resource']['ID'] ] : '';
-					$new_resource_block_costs[ $resource_id ] = ! empty( $resource_block_costs[ $resource['resource']['ID'] ] ) ? $resource_block_costs[ $resource['resource']['ID'] ] : '';
-					$wpdb->query( $wpdb->prepare( "INSERT INTO {$wpdb->prefix}wc_booking_relationships ( product_id, resource_id ) VALUES ( %d, %d )",
-						$product_id,
-						$resource_id ) );
-				}
-
-				if ( ! empty( $new_resource_base_costs ) ) {
-					update_post_meta( $product_id, '_resource_base_costs', $new_resource_base_costs );
-				}
-
-				if ( ! empty( $new_resource_block_costs ) ) {
-					update_post_meta( $product_id, '_resource_block_costs', $new_resource_block_costs );
-				}
-			}
-
-			// Persons.
-			if ( ! empty( $product['persons'] ) ) {
-				foreach ( $product['persons'] as $person ) {
-					$person_data = array(
-						'post_title'   => sanitize_text_field( $person['person']['post_title'] ) . ' (person test #' . absint( $person['person']['ID'] ) . ')',
-						'post_type'    => 'bookable_person',
-						'post_status'  => 'publish',
-						'post_parent'  => absint( $product_id ),
-						'post_excerpt' => sanitize_text_field( $person['person']['post_excerpt'] ),
-					);
-
-					$person_id = wp_insert_post( $person_data, false );
-
-					if ( empty( $person_id ) ) {
-						throw new Exception( __( 'Failed to create person.', 'bookings-helper' ) );
-					}
-
-					foreach ( $person['person_meta'] as $meta ) {
-						add_post_meta( absint( $person_id ),
-							sanitize_text_field( $meta['meta_key'] ),
-							sanitize_text_field( $meta['meta_value'] ) );
-					}
-				}
-			}
+			$this->import_product_from_json($product_json);
 
 			$success_message = __( 'Booking Product imported successfully!', 'bookings-helper' );
 
@@ -269,7 +165,7 @@ class WC_Bookings_Helper_Import extends WC_Bookings_Helper_Utils {
 	 *
 	 * @return void
 	 */
-	public function import_rules_from_json( $global_rules_json ) {
+	public function import_rules_from_json( string $global_rules_json ) {
 		$global_rules = json_decode( $global_rules_json, true );
 
 		// Sanitize.
@@ -321,6 +217,124 @@ class WC_Bookings_Helper_Import extends WC_Bookings_Helper_Utils {
 						'%s',
 					)
 				);
+			}
+		}
+	}
+
+	/**
+	 * Should import product from json.
+	 *
+	 * @since x.x.x
+	 *
+	 * @param string $product_json Booking product data in json format.
+	 *
+	 * @return void
+	 * @throws Exception
+	 */
+	public function import_product_from_json( string $product_json ) {
+		$product = json_decode( $product_json, true );
+
+		// Sanitize.
+		array_walk_recursive( $product, 'wc_clean' );
+
+		global $wpdb;
+
+		// Product.
+		$product_data = array(
+			'post_title'   => sanitize_text_field( $product['product']['post_title'] ) . ' (bookings test #' . absint( $product['product']['ID'] ) . ')',
+			'post_content' => sanitize_text_field( $product['product']['post_content'] ),
+			'post_type'    => 'product',
+			'post_status'  => 'publish',
+		);
+
+		$product_id = wp_insert_post( $product_data, false );
+
+		if ( empty( $product_id ) ) {
+			throw new Exception( 'Failed to create product.' );
+		}
+
+		// Product meta.
+		foreach ( $product['product_meta'] as $meta ) {
+			// Skip double serialization.
+			if ( is_serialized( $meta['meta_value'] ) ) {
+				$wpdb->query( $wpdb->prepare( "INSERT INTO {$wpdb->postmeta} ( post_id, meta_key, meta_value ) VALUES ( %d, %s, %s )",
+					$product_id,
+					sanitize_text_field( $meta['meta_key'] ),
+					sanitize_text_field( $meta['meta_value'] ) ) );
+			} else {
+				add_post_meta( $product_id,
+					sanitize_text_field( $meta['meta_key'] ),
+					sanitize_text_field( $meta['meta_value'] ) );
+			}
+		}
+
+		$product_type = ! empty( $product['product']['type'] ) ? $product['product']['type'] : 'booking';
+		wp_set_object_terms( $product_id, $product_type, 'product_type' );
+
+		// Resources.
+		if ( ! empty( $product['resources'] ) ) {
+			$resource_base_costs      = get_post_meta( $product_id, '_resource_base_costs', true );
+			$new_resource_base_costs  = array();
+			$resource_block_costs     = get_post_meta( $product_id, '_resource_block_costs', true );
+			$new_resource_block_costs = array();
+
+			foreach ( $product['resources'] as $resource ) {
+				$resource_data = array(
+					'post_title'  => sanitize_text_field( $resource['resource']['post_title'] ) . ' (resource test #' . absint( $resource['resource']['ID'] ) . ')',
+					'post_type'   => 'bookable_resource',
+					'post_status' => 'publish',
+				);
+
+				$resource_id = wp_insert_post( $resource_data, false );
+
+				if ( empty( $resource_id ) ) {
+					throw new Exception( __( 'Failed to create resource.', 'bookings-helper' ) );
+				}
+
+				foreach ( $resource['resource_meta'] as $meta ) {
+					add_post_meta( $resource_id,
+						sanitize_text_field( $meta['meta_key'] ),
+						sanitize_text_field( $meta['meta_value'] ) );
+				}
+
+				$new_resource_base_costs[ $resource_id ]  = ! empty( $resource_base_costs[ $resource['resource']['ID'] ] ) ? $resource_base_costs[ $resource['resource']['ID'] ] : '';
+				$new_resource_block_costs[ $resource_id ] = ! empty( $resource_block_costs[ $resource['resource']['ID'] ] ) ? $resource_block_costs[ $resource['resource']['ID'] ] : '';
+				$wpdb->query( $wpdb->prepare( "INSERT INTO {$wpdb->prefix}wc_booking_relationships ( product_id, resource_id ) VALUES ( %d, %d )",
+					$product_id,
+					$resource_id ) );
+			}
+
+			if ( ! empty( $new_resource_base_costs ) ) {
+				update_post_meta( $product_id, '_resource_base_costs', $new_resource_base_costs );
+			}
+
+			if ( ! empty( $new_resource_block_costs ) ) {
+				update_post_meta( $product_id, '_resource_block_costs', $new_resource_block_costs );
+			}
+		}
+
+		// Persons.
+		if ( ! empty( $product['persons'] ) ) {
+			foreach ( $product['persons'] as $person ) {
+				$person_data = array(
+					'post_title'   => sanitize_text_field( $person['person']['post_title'] ) . ' (person test #' . absint( $person['person']['ID'] ) . ')',
+					'post_type'    => 'bookable_person',
+					'post_status'  => 'publish',
+					'post_parent'  => absint( $product_id ),
+					'post_excerpt' => sanitize_text_field( $person['person']['post_excerpt'] ),
+				);
+
+				$person_id = wp_insert_post( $person_data, false );
+
+				if ( empty( $person_id ) ) {
+					throw new Exception( __( 'Failed to create person.', 'bookings-helper' ) );
+				}
+
+				foreach ( $person['person_meta'] as $meta ) {
+					add_post_meta( absint( $person_id ),
+						sanitize_text_field( $meta['meta_key'] ),
+						sanitize_text_field( $meta['meta_value'] ) );
+				}
 			}
 		}
 	}
