@@ -1,4 +1,10 @@
 <?php
+/**
+ * This file contains the logic for handling export for booking products and global availability rules.
+ *
+ * @package Bookings Helper
+ * @since   1.0.0
+ */
 
 /**
  * Class for export functionality.
@@ -36,9 +42,11 @@ class WC_Bookings_Helper_Export extends WC_Bookings_Helper_Utils {
 			return;
 		}
 
+		$nonce = sanitize_text_field( wp_unslash( $_POST['_wpnonce'] ) );
+
 		if (
-			! wp_verify_nonce( $_POST['_wpnonce'], 'export_globals' ) &&
-			! wp_verify_nonce( $_POST['_wpnonce'], 'export_product' )
+			! wp_verify_nonce( $nonce, 'export_globals' ) &&
+			! wp_verify_nonce( $nonce, 'export_product' )
 		) {
 			wp_die( 'Cheatin&#8217; huh?' );
 		}
@@ -102,8 +110,10 @@ class WC_Bookings_Helper_Export extends WC_Bookings_Helper_Utils {
 	 *
 	 * @since x.x.x
 	 *
-	 * @throws Exception
-	 * @global WPDB $wpdb
+	 * @param int $product_id Product ID.
+	 *
+	 * @throws Exception If no product exists, show error.
+	 * @global WPDB $wpdb WordPress database object.
 	 */
 	public function get_booking_product_data( $product_id ): string {
 		global $wpdb;
@@ -259,7 +269,7 @@ class WC_Bookings_Helper_Export extends WC_Bookings_Helper_Utils {
 	 * Note: this function returns data in json format.
 	 *
 	 * @since x.x.x
-	 * @throws Exception|RuntimeException
+	 * @throws Exception|RuntimeException If no booking products found, show error.
 	 */
 	public function get_all_booking_products_data(): string {
 		global $wpdb;
@@ -296,7 +306,7 @@ class WC_Bookings_Helper_Export extends WC_Bookings_Helper_Utils {
 	 *
 	 * @return string
 	 *
-	 * @throws Exception
+	 * @throws Exception|RuntimeException When there are no rules to export.
 	 */
 	public function get_global_availability_rules(): string {
 		if ( version_compare( WC_BOOKINGS_VERSION, '1.13.0', '<' ) ) {

@@ -1,4 +1,10 @@
 <?php
+/**
+ *  This file has logic to handle booking product and global availability rules import.
+ *
+ * @package Bookings Helper
+ * @since   1.0.0
+ */
 
 /**
  * Class for import functionality.
@@ -30,15 +36,17 @@ class WC_Bookings_Helper_Import extends WC_Bookings_Helper_Utils {
 		}
 
 		if (
-			'import_globals' !== $_POST['action'] &&
-			'import_product' !== $_POST['action']
+			'import_globals' !== $_POST['action'] && // phpcs:ignore
+			'import_product' !== $_POST['action'] // phpcs:ignore
 		) {
 			return;
 		}
 
+		$nonce = sanitize_text_field( wp_unslash( $_POST['_wpnonce'] ) );
+
 		if (
-			! wp_verify_nonce( $_POST['_wpnonce'], 'import_globals' ) &&
-			! wp_verify_nonce( $_POST['_wpnonce'], 'import_product' )
+			! wp_verify_nonce( $nonce, 'import_globals' ) &&
+			! wp_verify_nonce( $nonce, 'import_product' )
 		) {
 			wp_die( 'Cheatin&#8217; huh?' );
 		}
@@ -66,7 +74,7 @@ class WC_Bookings_Helper_Import extends WC_Bookings_Helper_Utils {
 	public function import_global_rules( $global_rules_form_product_zip = '' ) {
 		try {
 			if ( empty( $global_rules_form_product_zip ) ) {
-				if ( empty( $_FILES ) || empty( $_FILES['import'] ) || 0 !== $_FILES['import']['error'] || empty( $_FILES['import']['tmp_name'] ) ) {
+				if ( empty( $_FILES ) || empty( $_FILES['import'] ) || 0 !== $_FILES['import']['error'] || empty( $_FILES['import']['tmp_name'] ) ) { //phpcs:ignore
 					throw new Exception(
 						__(
 							'There are no rules to import or file is not valid.',
@@ -74,14 +82,14 @@ class WC_Bookings_Helper_Import extends WC_Bookings_Helper_Utils {
 						)
 					);
 				} else {
-					if ( $_FILES['import']['size'] > 1000000 ) {
+					if ( $_FILES['import']['size'] > 1000000 ) { //phpcs:ignore
 						throw new Exception( __( 'The file exceeds 1MB.', 'bookings-helper' ) );
 					}
 
 					if ( $this->ziparchive_available ) {
 						$global_rules_json = $this->open_zip();
 					} else {
-						$global_rules_json = file_get_contents( $_FILES['import']['tmp_name'] );
+						$global_rules_json = file_get_contents( sanitize_text_field( wp_unslash( $_FILES['import']['tmp_name'] ) ) );  //phpcs:ignore
 					}
 
 					if ( ! $this->is_json( $global_rules_json ) ) {
@@ -124,7 +132,7 @@ class WC_Bookings_Helper_Import extends WC_Bookings_Helper_Utils {
 	 */
 	public function import_product() {
 		try {
-			if ( empty( $_FILES ) || empty( $_FILES['import'] ) || 0 !== $_FILES['import']['error'] || empty( $_FILES['import']['tmp_name'] ) ) {
+			if ( empty( $_FILES ) || empty( $_FILES['import'] ) || 0 !== $_FILES['import']['error'] || empty( $_FILES['import']['tmp_name'] ) ) { //phpcs:ignore
 				throw new Exception(
 					__(
 						'There is no bookable product to import or file is not valid.',
@@ -132,14 +140,14 @@ class WC_Bookings_Helper_Import extends WC_Bookings_Helper_Utils {
 					)
 				);
 			} else {
-				if ( $_FILES['import']['size'] > 1000000 ) {
+				if ( $_FILES['import']['size'] > 1000000 ) { // phpcs:ignore
 					throw new Exception( __( 'The file exceeds 1MB.', 'bookings-helper' ) );
 				}
 
 				if ( $this->ziparchive_available ) {
 					$product_json = $this->open_zip();
 				} else {
-					$product_json = file_get_contents( $_FILES['import']['tmp_name'] );
+					$product_json = file_get_contents( sanitize_text_field( wp_unslash( $_FILES['import']['tmp_name'] ) ) ); // phpcs:ignore
 				}
 
 				if ( ! $this->is_json( $product_json ) ) {
@@ -241,7 +249,7 @@ class WC_Bookings_Helper_Import extends WC_Bookings_Helper_Utils {
 	 * @param string $product_json Booking product data in json format.
 	 *
 	 * @return void
-	 * @throws Exception
+	 * @throws Exception Show error if something goes wrong.
 	 */
 	public function import_product_from_json( string $product_json ) {
 		$product = json_decode( $product_json, true );

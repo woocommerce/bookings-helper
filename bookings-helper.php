@@ -1,4 +1,4 @@
-<?php
+<?php // phpcs:disable WordPress.Files.FileName.InvalidClassFileName WooCommerce.Commenting.CommentTags.AuthorTag
 /**
  * Plugin Name: Bookings Helper
  * Version: 1.0.5
@@ -54,8 +54,6 @@ if ( ! class_exists( 'Bookings_Helper' ) ) {
 
 		/**
 		 * Load Classes.
-		 *
-		 * @throws Exception
 		 */
 		public function includes() {
 			require_once WC_BOOKINGS_HELPER_ABSPATH . 'includes/class-wc-bookings-helper-utils.php';
@@ -104,7 +102,7 @@ require_once 'vendor/autoload.php';
  */
 function woocommerce_bookings_helper_missing_wc_notice() {
 	/* translators: %s WC download URL link. */
-	echo '<div class="error"><p><strong>' . sprintf( esc_html__( 'Bookings Helper plugin requires WooCommerce to be installed and active. You can download %s here.', 'woocommerce-bookings' ), '<a href="https://woocommerce.com/" target="_blank">WooCommerce</a>' ) . '</strong></p></div>';
+	echo '<div class="error"><p><strong>' . sprintf( esc_html__( 'Bookings Helper plugin requires WooCommerce to be installed and active. You can download %s here.', 'bookings-helper' ), '<a href="https://woocommerce.com/" target="_blank">WooCommerce</a>' ) . '</strong></p></div>';
 }
 
 /**
@@ -114,7 +112,7 @@ function woocommerce_bookings_helper_missing_wc_notice() {
  */
 function woocommerce_bookings_helper_missing_bookings_notice() {
 	/* translators: %s WC download URL link. */
-	echo '<div class="error"><p><strong>' . sprintf( esc_html__( 'Bookings Helper plugin requires WooCommerce Bookings to be installed and active. You can download %s here.', 'woocommerce-bookings' ), '<a href="https://woocommerce.com/products/woocommerce-bookings/" target="_blank">WooCommerce Bookings</a>' ) . '</strong></p></div>';
+	echo '<div class="error"><p><strong>' . sprintf( esc_html__( 'Bookings Helper plugin requires WooCommerce Bookings to be installed and active. You can download %s here.', 'bookings-helper' ), '<a href="https://woocommerce.com/products/woocommerce-bookings/" target="_blank">WooCommerce Bookings</a>' ) . '</strong></p></div>';
 }
 
 /**
