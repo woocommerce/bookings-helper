@@ -27,9 +27,13 @@ class WC_Bookings_Helper_Products_Command extends WP_CLI_Command {
 	 * [--dir=<absolute_path_to_dir>]
 	 * : The directory path to export the booking products
 	 *
+	 * [--products=<product_ids>]
+	 * : The booking product ids to export. ths product ids should be comma separated without spaces.
+	 *
 	 * ## EXAMPLES
 	 * wp booking-helper-products export --all
 	 * wp booking-helper-products export --all --dir=/path/to/export
+	 * wp booking-helper-products export --products="68,73"
 	 *
 	 * @since x.x.x
 	 *
@@ -41,7 +45,7 @@ class WC_Bookings_Helper_Products_Command extends WP_CLI_Command {
 	 */
 	public function export( array $args, array $assoc_args ) {
 		// Export all booking products.
-		if ( empty( $assoc_args['all'] ) ) {
+		if ( empty( $assoc_args['all'] ) && empty( $assoc_args['products'] ) ) {
 			WP_CLI::error( 'Please provide a --all to export all booking products.' );
 
 			return;
@@ -67,11 +71,20 @@ class WC_Bookings_Helper_Products_Command extends WP_CLI_Command {
 			$zip = new ZipArchive();
 			$zip->open( $zip_file_path, ZipArchive::CREATE | ZipArchive::OVERWRITE );
 
-			$zip->addFromString(
-				$json_file_name,
-				// Get json data for all booking products.
-				( new WC_Bookings_Helper_Export() )->get_all_booking_products_data()
-			);
+			// Get booking products data in json format.
+			if( $assoc_args['products'] ) {
+				$product_ids = array_map( 'absint', explode( ',', $assoc_args['products'] ) );
+
+				foreach ( $product_ids as $product_id ) {
+					$booking_products_data[ $product_id ] = ( new WC_Bookings_Helper_Export() )->get_booking_product_data( $product_id );
+				}
+
+				$export_data = wp_json_encode( $booking_products_data );
+			} else{
+				$export_data = ( new WC_Bookings_Helper_Export() )->get_all_booking_products_data();
+			}
+
+			$zip->addFromString( $json_file_name, $export_data );
 
 			$zip->close();
 
