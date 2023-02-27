@@ -17,5 +17,10 @@
       "automattic/jetpack-autoloader": true,
       "dealerdirect/phpcodesniffer-composer-installer": true
     }
+  },
+  "autoload": {
+    "files": [
+      "includes/wp-cli-commands/class-wc-bookings-export-command.php"
+    ]
   }
 }

@@ -54,11 +54,15 @@ if ( ! class_exists( 'Bookings_Helper' ) ) {
 
 		/**
 		 * Load Classes.
+		 * @throws Exception
 		 */
 		public function includes() {
 			require_once WC_BOOKINGS_HELPER_ABSPATH . 'includes/class-wc-bookings-helper-utils.php';
 			require_once WC_BOOKINGS_HELPER_ABSPATH . 'includes/class-wc-bookings-helper-export.php';
 			require_once WC_BOOKINGS_HELPER_ABSPATH . 'includes/class-wc-bookings-helper-import.php';
+
+			// WP CLI commands.
+			require_once WC_BOOKINGS_HELPER_ABSPATH . 'includes/wp-cli-commands/class-wc-bookings-export-command.php';
 		}
 
 		/**
@@ -92,6 +96,8 @@ if ( ! class_exists( 'Bookings_Helper' ) ) {
 		}
 	}
 }
+
+require_once 'vendor/autoload.php';
 
 /**
  * WooCommerce fallback notice.
@@ -135,3 +141,9 @@ function woocommerce_bookings_helper_init() {
 }
 
 add_action( 'plugins_loaded', 'woocommerce_bookings_helper_init', 10 );
+
+// Register WP CLI command.
+if ( defined( 'WP_CLI' ) && WP_CLI ) {
+	WP_CLI::add_command( 'booking-helper export', 'WC_Bookings_Export_Command' );
+}
+
