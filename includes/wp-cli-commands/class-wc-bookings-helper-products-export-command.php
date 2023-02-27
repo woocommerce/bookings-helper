@@ -12,7 +12,7 @@ use WP_CLI\ExitException;
  * Class WC_Bookings_Export_Command
  * @since x.x.x
  */
-class WC_Bookings_Export_Command {
+class WC_Bookings_Helper_Products_Export_Command {
 	/**
 	 * Exports booking products.
 	 *

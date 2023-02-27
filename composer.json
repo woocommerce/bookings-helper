@@ -20,7 +20,7 @@
   },
   "autoload": {
     "files": [
-      "includes/wp-cli-commands/class-wc-bookings-export-command.php"
+      "includes/wp-cli-commands/class-wc-bookings-helper-products-export-command.php"
     ]
   },
   "archive": {

@@ -144,6 +144,6 @@ add_action( 'plugins_loaded', 'woocommerce_bookings_helper_init', 10 );
 
 // Register WP CLI command.
 if ( defined( 'WP_CLI' ) && WP_CLI ) {
-	WP_CLI::add_command( 'booking-helper export', 'WC_Bookings_Export_Command' );
+	WP_CLI::add_command( 'bookings-helper-products export', 'WC_Bookings_Helper_Products_Export_Command' );
 }
 
