@@ -22,5 +22,10 @@
     "files": [
       "includes/wp-cli-commands/class-wc-bookings-export-command.php"
     ]
+  },
+  "archive": {
+    "exclude": [
+      "!vendor"
+    ]
   }
 }
