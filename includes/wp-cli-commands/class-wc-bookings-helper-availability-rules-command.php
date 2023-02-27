@@ -36,7 +36,7 @@ class WC_Bookings_Helper_Availability_Rules_Command extends WP_CLI_Command {
 	 * @param array $assoc_args Subcommand assoc args.
 	 *
 	 * @return void
-	 * @throws ExitException
+	 * @throws ExitException WP CLI error.
 	 */
 	public function export( array $args, array $assoc_args ) {
 		// Default path is wp-content/uploads.
@@ -50,7 +50,7 @@ class WC_Bookings_Helper_Availability_Rules_Command extends WP_CLI_Command {
 			$zip_file_path  = "$directory_path/$name_prefix.zip";
 			$json_file_name = "$name_prefix.json";
 
-			// Create zip;
+			// Create zip.
 			$zip = new ZipArchive();
 			$zip->open( $zip_file_path, ZipArchive::CREATE | ZipArchive::OVERWRITE );
 
@@ -91,7 +91,7 @@ class WC_Bookings_Helper_Availability_Rules_Command extends WP_CLI_Command {
 	 * @param array $assoc_args Subcommand assoc args.
 	 *
 	 * @return void
-	 * @throws ExitException
+	 * @throws ExitException WP CLI error.
 	 */
 	public function import( array $args, array $assoc_args ) {
 		if ( empty( $assoc_args['file'] ) ) {
@@ -113,7 +113,7 @@ class WC_Bookings_Helper_Availability_Rules_Command extends WP_CLI_Command {
 
 		$zip->extractTo( dirname( $file_path ) );
 
-		$availability_rules = file_get_contents( $json_file_path );
+		$availability_rules = file_get_contents( $json_file_path ); // phpcs:ignore
 		unlink( $json_file_path );
 
 		if ( empty( $availability_rules ) ) {

@@ -1,6 +1,6 @@
 <?php
 /**
- * he WP CLI command for handle commands for booking products.
+ * The WP CLI command for handle commands for booking products.
  *
  * @package Bookings Helper/ WP CLI commands
  * @since   x.x.x
@@ -42,7 +42,7 @@ class WC_Bookings_Helper_Products_Command extends WP_CLI_Command {
 	 * @param array $assoc_args Subcommand assoc args.
 	 *
 	 * @return void
-	 * @throws ExitException
+	 * @throws ExitException WP CLI error.
 	 */
 	public function export( array $args, array $assoc_args ) {
 		// Export all booking products.
@@ -60,16 +60,13 @@ class WC_Bookings_Helper_Products_Command extends WP_CLI_Command {
 		try {
 			$name_prefix = sprintf(
 				'booking-product-%s',
-				date(
-					'Y-m-d',
-					current_time( 'timestamp' )
-				)
+				date( 'Y-m-d', current_time( 'timestamp' ) ) // phpcs:ignore
 			);
 
 			$zip_file_path  = "$directory_path/$name_prefix.zip";
 			$json_file_name = "$name_prefix.json";
 
-			// Create zip;
+			// Create zip.
 			$zip = new ZipArchive();
 			$zip->open( $zip_file_path, ZipArchive::CREATE | ZipArchive::OVERWRITE );
 
@@ -120,7 +117,7 @@ class WC_Bookings_Helper_Products_Command extends WP_CLI_Command {
 	 * @param array $assoc_args Subcommand assoc args.
 	 *
 	 * @return void
-	 * @throws ExitException
+	 * @throws ExitException WP CLI error.
 	 */
 	public function import( array $args, array $assoc_args ) {
 		if ( empty( $assoc_args['file'] ) ) {
@@ -143,7 +140,7 @@ class WC_Bookings_Helper_Products_Command extends WP_CLI_Command {
 		$zip->extractTo( dirname( $file_path ) );
 		$zip->close();
 
-		$products = file_get_contents( $json_file_path );
+		$products = file_get_contents( $json_file_path ); // phpcs:ignore
 		unlink( $json_file_path );
 
 		if ( empty( $products ) ) {
