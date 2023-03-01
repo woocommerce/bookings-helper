@@ -15,7 +15,7 @@ if ( ! class_exists( 'WP_CLI_Command' ) ) {
 /**
  * Class WC_Bookings_Export_Command
  *
- * @since x.x.x
+ * @since x1.0.6
  */
 class WC_Bookings_Helper_Products_Command extends WP_CLI_Command {
 	/**
@@ -36,7 +36,7 @@ class WC_Bookings_Helper_Products_Command extends WP_CLI_Command {
 	 * wp booking-helper-products export --all --dir=/path/to/export
 	 * wp booking-helper-products export --products="68,73"
 	 *
-	 * @since x.x.x
+	 * @since x1.0.6
 	 *
 	 * @param array $args       Subcommand args.
 	 * @param array $assoc_args Subcommand assoc args.
@@ -112,7 +112,7 @@ class WC_Bookings_Helper_Products_Command extends WP_CLI_Command {
 	 * ## EXAMPLES
 	 * wp booking-helper-products import --all --file=/path/to/absolute_path_to_zip_file
 	 *
-	 * @since x.x.x
+	 * @since x1.0.6
 	 *
 	 * @param array $args       Subcommand args.
 	 * @param array $assoc_args Subcommand assoc args.
