@@ -1,4 +1,4 @@
-<?php // phpcs:disable WordPress.Files.FileName.InvalidClassFileName WooCommerce.Commenting.CommentTags.AuthorTag
+<?php // phpcs:disable WooCommerce.Commenting.CommentTags.AuthorTag,WordPress.Files.FileName.InvalidClassFileName
 /**
  * Plugin Name: Bookings Helper
  * Version: 1.0.5
@@ -140,9 +140,9 @@ add_action( 'plugins_loaded', 'woocommerce_bookings_helper_init', 10 );
 
 // Register WP CLI command.
 if ( defined( 'WP_CLI' ) && WP_CLI ) {
-	WP_CLI::add_command( 'bookings-helper export-products', [ 'WC_Bookings_Helper_Products_Command', 'export' ] );
-	WP_CLI::add_command( 'bookings-helper import-products', [ 'WC_Bookings_Helper_Products_Command', 'import' ] );
-	WP_CLI::add_command( 'bookings-helper export-availability-rules', [ 'WC_Bookings_Helper_Availability_Rules_Command', 'export' ] );
-	WP_CLI::add_command( 'bookings-helper import-availability-rules', [ 'WC_Bookings_Helper_Availability_Rules_Command', 'import' ] );
+	WP_CLI::add_command( 'bookings-helper export-products', array( 'WC_Bookings_Helper_Products_Command', 'export' ) );
+	WP_CLI::add_command( 'bookings-helper import-products', array( 'WC_Bookings_Helper_Products_Command', 'import' ) );
+	WP_CLI::add_command( 'bookings-helper export-availability-rules', array( 'WC_Bookings_Helper_Availability_Rules_Command', 'export' ) );
+	WP_CLI::add_command( 'bookings-helper import-availability-rules', array( 'WC_Bookings_Helper_Availability_Rules_Command', 'import' ) );
 }
 
