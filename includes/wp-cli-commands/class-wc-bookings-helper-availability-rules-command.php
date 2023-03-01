@@ -47,12 +47,18 @@ class WC_Bookings_Helper_Availability_Rules_Command extends WP_CLI_Command {
 		try {
 			$name_prefix = 'bookings-global-rules';
 
-			$zip_file_path  = "$directory_path/$name_prefix.zip";
+			$zip_file_path  = sprintf(
+				'%s/%s-%s.zip',
+				$directory_path,
+				$name_prefix,
+				substr( uniqid( '', false ), 0, 5 )
+			);
+
 			$json_file_name = "$name_prefix.json";
 
 			// Create zip.
 			$zip = new ZipArchive();
-			$zip->open( $zip_file_path, ZipArchive::CREATE | ZipArchive::OVERWRITE );
+			$zip->open( $zip_file_path, ZipArchive::CREATE );
 
 			$zip->addFromString(
 				$json_file_name,

@@ -59,8 +59,9 @@ class WC_Bookings_Helper_Products_Command extends WP_CLI_Command {
 
 		try {
 			$name_prefix = sprintf(
-				'booking-product-%s',
-				date( 'Y-m-d', current_time( 'timestamp' ) ) // phpcs:ignore
+				'booking-product-%s-%s',
+				date( 'Y-m-d', current_time( 'timestamp' ) ), // phpcs:ignore
+				substr( uniqid( '', false ), 0, 5 )
 			);
 
 			$zip_file_path  = "$directory_path/$name_prefix.zip";
@@ -71,7 +72,7 @@ class WC_Bookings_Helper_Products_Command extends WP_CLI_Command {
 			$zip->open( $zip_file_path, ZipArchive::CREATE | ZipArchive::OVERWRITE );
 
 			// Get booking products data in json format.
-			if ( $assoc_args['products'] ) {
+			if ( ! empty( $assoc_args['products'] ) ) {
 				$product_ids = array_map( 'absint', explode( ',', $assoc_args['products'] ) );
 
 				foreach ( $product_ids as $product_id ) {
