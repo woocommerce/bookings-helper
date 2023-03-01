@@ -3,7 +3,7 @@
  * The WP CLI command for handle commands for booking products.
  *
  * @package Bookings Helper/ WP CLI commands
- * @since   x.x.x
+ * @since   1.0.6
  */
 
 use WP_CLI\ExitException;
