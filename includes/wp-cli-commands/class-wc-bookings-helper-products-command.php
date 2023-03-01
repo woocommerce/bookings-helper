@@ -59,7 +59,7 @@ class WC_Bookings_Helper_Products_Command extends WP_CLI_Command {
 
 		try {
 			$name_prefix = sprintf(
-				'booking-product-%s-%s',
+				'booking-products-%s-%s',
 				date( 'Y-m-d', current_time( 'timestamp' ) ), // phpcs:ignore
 				substr( uniqid( '', false ), 0, 5 )
 			);

@@ -45,7 +45,7 @@ class WC_Bookings_Helper_Availability_Rules_Command extends WP_CLI_Command {
 			$assoc_args['dir'];
 
 		try {
-			$name_prefix = 'bookings-global-rules';
+			$name_prefix = 'booking-global-rules';
 
 			$zip_file_path  = sprintf(
 				'%s/%s-%s.zip',
