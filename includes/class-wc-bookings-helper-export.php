@@ -279,7 +279,9 @@ class WC_Bookings_Helper_Export extends WC_Bookings_Helper_Utils {
 			SELECT tr.object_id FROM
 			$wpdb->term_relationships AS tr
 			INNER JOIN $wpdb->terms AS t ON tr.term_taxonomy_id = t.term_id
+			INNER JOIN $wpdb->posts AS p ON tr.object_id = p.ID
 			WHERE t.slug IN('booking', 'accommodation-booking')
+			AND p.post_status = 'publish'
 			"
 		);
 
