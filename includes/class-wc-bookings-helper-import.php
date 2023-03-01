@@ -254,6 +254,14 @@ class WC_Bookings_Helper_Import extends WC_Bookings_Helper_Utils {
 	public function import_product_from_json( string $product_json ) {
 		$product = json_decode( $product_json, true );
 
+		if ( ! isset( $product['product'] ) ) {
+			foreach ( $product as $product_data ) {
+				$this->import_product_from_json( $product_data );
+			}
+
+			return;
+		}
+
 		// Sanitize.
 		array_walk_recursive( $product, 'wc_clean' );
 
