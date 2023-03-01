@@ -15,7 +15,7 @@ if ( ! class_exists( 'WP_CLI_Command' ) ) {
 /**
  * Class WC_Bookings_Helper_Availability_Rules_Command
  *
- * @since x1.0.6
+ * @since 1.0.6
  */
 class WC_Bookings_Helper_Availability_Rules_Command extends WP_CLI_Command {
 	/**
@@ -30,7 +30,7 @@ class WC_Bookings_Helper_Availability_Rules_Command extends WP_CLI_Command {
 	 * wp booking-helper-availability-rules export
 	 * wp booking-helper-availability-rules export --dir=/path/to/export
 	 *
-	 * @since x1.0.6
+	 * @since 1.0.6
 	 *
 	 * @param array $args       Subcommand args.
 	 * @param array $assoc_args Subcommand assoc args.
@@ -91,7 +91,7 @@ class WC_Bookings_Helper_Availability_Rules_Command extends WP_CLI_Command {
 	 * ## EXAMPLES
 	 * wp booking-helper-availability-rules import --file=/path/to/absolute_path_to_zip_file
 	 *
-	 * @since x1.0.6
+	 * @since 1.0.6
 	 *
 	 * @param array $args       Subcommand args.
 	 * @param array $assoc_args Subcommand assoc args.

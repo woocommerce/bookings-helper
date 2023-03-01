@@ -179,7 +179,7 @@ class WC_Bookings_Helper_Import extends WC_Bookings_Helper_Utils {
 	/**
 	 * Should import global rules from json
 	 *
-	 * @since x1.0.6
+	 * @since 1.0.6
 	 *
 	 * @param string $global_rules_json Global availability rules in json format.
 	 *
@@ -244,7 +244,7 @@ class WC_Bookings_Helper_Import extends WC_Bookings_Helper_Utils {
 	/**
 	 * Should import product from json.
 	 *
-	 * @since x1.0.6
+	 * @since 1.0.6
 	 *
 	 * @param string $product_json Booking product data in json format.
 	 *

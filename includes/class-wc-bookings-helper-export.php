@@ -108,7 +108,7 @@ class WC_Bookings_Helper_Export extends WC_Bookings_Helper_Utils {
 	 * Get Booking product data by id.
 	 * Note: this function returns data in json format.
 	 *
-	 * @since x1.0.6
+	 * @since 1.0.6
 	 *
 	 * @param int $product_id Product ID.
 	 *
@@ -268,7 +268,7 @@ class WC_Bookings_Helper_Export extends WC_Bookings_Helper_Utils {
 	 * Get all booking products data.
 	 * Note: this function returns data in json format.
 	 *
-	 * @since x1.0.6
+	 * @since 1.0.6
 	 * @throws Exception|RuntimeException If no booking products found, show error.
 	 */
 	public function get_all_booking_products_data(): string {
@@ -304,7 +304,7 @@ class WC_Bookings_Helper_Export extends WC_Bookings_Helper_Utils {
 	/**
 	 * Get all global availability rules.
 	 *
-	 * @since x1.0.6
+	 * @since 1.0.6
 	 *
 	 * @return string
 	 *
