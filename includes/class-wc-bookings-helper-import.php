@@ -254,6 +254,10 @@ class WC_Bookings_Helper_Import extends WC_Bookings_Helper_Utils {
 	public function import_product_from_json( string $product_json ) {
 		$product = json_decode( $product_json, true );
 
+		// Check if data has multiple booking products.
+		// At this moment we only support one product per file which imports from user interface.
+		// But we can import multiple products from wp cli.
+		// So we need to check if we have multiple products and import them one by one.
 		if ( ! isset( $product['product'] ) ) {
 			foreach ( $product as $product_data ) {
 				$this->import_product_from_json( $product_data );
