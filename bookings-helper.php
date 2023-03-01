@@ -140,7 +140,9 @@ add_action( 'plugins_loaded', 'woocommerce_bookings_helper_init', 10 );
 
 // Register WP CLI command.
 if ( defined( 'WP_CLI' ) && WP_CLI ) {
-	WP_CLI::add_command( 'bookings-helper-products', 'WC_Bookings_Helper_Products_Command' );
-	WP_CLI::add_command( 'bookings-helper-availability-rules', 'WC_Bookings_Helper_Availability_Rules_Command' );
+	WP_CLI::add_command( 'bookings-helper export-products', [ 'WC_Bookings_Helper_Products_Command', 'export' ] );
+	WP_CLI::add_command( 'bookings-helper import-products', [ 'WC_Bookings_Helper_Products_Command', 'import' ] );
+	WP_CLI::add_command( 'bookings-helper export-availability-rules', [ 'WC_Bookings_Helper_Availability_Rules_Command', 'export' ] );
+	WP_CLI::add_command( 'bookings-helper import-availability-rules', [ 'WC_Bookings_Helper_Availability_Rules_Command', 'import' ] );
 }
 
