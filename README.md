@@ -38,8 +38,6 @@ wp booking-helper export-availability-rules --dir=/absolute/path/to/directory/
 wp booking-helper import-availability-rules --file=/absolute/path/to/directory/
 ```
 
-Note: Booking product and global availability rules imported from user interface can be imported using wp-cli but not vice versa.
-
 # Usage
 
 Just install the plugin and activate. Then go to "Tools->Bookings Helper".
