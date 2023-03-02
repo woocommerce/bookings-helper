@@ -23,7 +23,10 @@ class WC_Bookings_Helper_Products_Command extends WP_CLI_Command {
 	 *
 	 * ## OPTIONS
 	 * [--all]
-	 * : Whether or not export all booking products
+	 * : Whether export all booking products or not
+	 *
+	 * [--with-global-rules]
+	 * : Whether export global availability rules or not
 	 *
 	 * [--dir=<absolute_path_to_dir>]
 	 * : The directory path to export the booking products
@@ -35,6 +38,7 @@ class WC_Bookings_Helper_Products_Command extends WP_CLI_Command {
 	 * wp booking-helper-products export --all
 	 * wp booking-helper-products export --all --dir=/path/to/export
 	 * wp booking-helper-products export --products="68,73"
+	 * wp booking-helper-products export --all --with-global-rules
 	 *
 	 * @since 1.0.6
 	 *
@@ -57,6 +61,8 @@ class WC_Bookings_Helper_Products_Command extends WP_CLI_Command {
 			trailingslashit( WP_CONTENT_DIR ) . 'uploads' :
 			$assoc_args['dir'];
 
+		$is_export_with_global_rules = ! empty( $assoc_args['with-global-rules'] );
+
 		try {
 			$name_prefix = sprintf(
 				'booking-products-%s-%s',
@@ -64,8 +70,14 @@ class WC_Bookings_Helper_Products_Command extends WP_CLI_Command {
 				substr( wp_generate_password(), 0, 5 )
 			);
 
-			$zip_file_path  = "$directory_path/$name_prefix.zip";
-			$json_file_name = "$name_prefix.json";
+			$zip_file_path  = $is_export_with_global_rules ?
+				str_replace(
+					'booking-products',
+					'booking-products-with-global-rules',
+					"$directory_path/$name_prefix.zip"
+				) :
+				"$directory_path/$name_prefix.zip";
+			$json_file_name = $is_export_with_global_rules ? 'booking-products.json' : "$name_prefix.json";
 
 			// Create zip.
 			$zip = new ZipArchive();
@@ -84,7 +96,14 @@ class WC_Bookings_Helper_Products_Command extends WP_CLI_Command {
 				$export_data = ( new WC_Bookings_Helper_Export() )->get_all_booking_products_data();
 			}
 
-			$zip->addFromString( $json_file_name, wp_json_encode($export_data) );
+			$zip->addFromString( $json_file_name, wp_json_encode( $export_data ) );
+
+			if ( $is_export_with_global_rules ) {
+				$zip->addFromString(
+					'global-availability-rules.json',
+					wp_json_encode( ( new WC_Bookings_Helper_Export() )->get_global_availability_rules() )
+				);
+			}
 
 			$zip->close();
 
