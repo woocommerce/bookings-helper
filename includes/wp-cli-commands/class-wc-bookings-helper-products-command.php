@@ -167,7 +167,8 @@ class WC_Bookings_Helper_Products_Command extends WP_CLI_Command {
 		if ( array_key_exists( 'product', $json_data ) ) {
 			// Add support: user should be able to import data exported from WP Dashboard (User Interface).
 			// convert data to new format.
-			$temp_products                                = array();
+			$temp_products = array();
+
 			$temp_products[ $json_data['product']['ID'] ] = $json_data;
 
 			$products = $temp_products;
@@ -196,18 +197,26 @@ class WC_Bookings_Helper_Products_Command extends WP_CLI_Command {
 		 * Import global availability rules.
 		 */
 		if ( $is_export_with_global_rules ) {
-			if ( ! empty( $json_data['global-availability-rules'] ) ) {
-				try {
-					$global_availability_rules = $json_data['global-availability-rules'];
+			$global_availability_rules = null;
 
-					( new WC_Bookings_Helper_Import() )->import_rules_from_json( wp_json_encode( $global_availability_rules ) );
+			if ( ! empty( $json_data['global-availability-rules'] ) ) {
+				$global_availability_rules = wp_json_encode( $json_data['global-availability-rules'] );
+			} elseif ( array_key_exists( 'product', $json_data ) && array_key_exists( 'global_rules', $json_data ) ) {
+				// Add support: user should be able to import data exported from WP Dashboard (User Interface).
+				// convert data to new format.
+				$global_availability_rules = $json_data['global_rules'];
+			} else {
+				WP_CLI::warning( 'Booking products import: File does not have global availability rules to import.' );
+			}
+
+			if ( $global_availability_rules ) {
+				try {
+					( new WC_Bookings_Helper_Import() )->import_rules_from_json( $global_availability_rules );
 				} catch ( Exception $e ) {
 					WP_CLI::error( 'Booking product import failed: ' . $e->getMessage() );
 				}
 
 				WP_CLI::success( 'Booking product global availability rules imported successfully.' );
-			} else {
-				WP_CLI::warning( 'Booking products import: File does not have global availability rules to import.' );
 			}
 		}
 
