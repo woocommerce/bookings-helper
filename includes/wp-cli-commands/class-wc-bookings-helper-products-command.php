@@ -61,12 +61,13 @@ class WC_Bookings_Helper_Products_Command extends WP_CLI_Command {
 			trailingslashit( WP_CONTENT_DIR ) . 'uploads' :
 			$assoc_args['dir'];
 
-		$is_export_with_global_rules = ! empty( $assoc_args['with-global-rules'] );
+		$is_exporting_with_global_rules = ! empty( $assoc_args['with-global-rules'] );
 
 		try {
+			// Create file name prefix on basis of export query.
 			$name_prefix = sprintf(
 				'booking-products%s-%s-%s',
-				$is_export_with_global_rules ? '-with-global-rules' : '',
+				$is_exporting_with_global_rules ? '-with-global-rules' : '',
 				date( 'Y-m-d', current_time( 'timestamp' ) ), // phpcs:ignore
 				substr( wp_generate_password(), 0, 5 )
 			);
@@ -74,22 +75,23 @@ class WC_Bookings_Helper_Products_Command extends WP_CLI_Command {
 			$zip_file_path  = "$directory_path/$name_prefix.zip";
 			$json_file_name = "$name_prefix.json";
 
-			// Create zip.
 			$zip = new ZipArchive();
 			$zip->open( $zip_file_path, ZipArchive::CREATE | ZipArchive::OVERWRITE );
 
-			// Get booking products data in json format.
 			if ( ! empty( $assoc_args['products'] ) ) {
+				// Export booking products.
 				$product_ids = array_map( 'absint', explode( ',', $assoc_args['products'] ) );
 
 				foreach ( $product_ids as $product_id ) {
 					$export_data['booking-products'][ $product_id ] = ( new WC_Bookings_Helper_Export() )->get_booking_product_data( $product_id );
 				}
 			} else {
+				// Export all booking products.
 				$export_data['booking-products'] = ( new WC_Bookings_Helper_Export() )->get_all_booking_products_data();
 			}
 
-			if ( $is_export_with_global_rules ) {
+			if ( $is_exporting_with_global_rules ) {
+				// Export global availability rules if requested.
 				$export_data['global-availability-rules'] = ( new WC_Bookings_Helper_Export() )->get_global_availability_rules();
 			}
 
