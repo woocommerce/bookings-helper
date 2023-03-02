@@ -165,7 +165,7 @@ class WC_Bookings_Helper_Products_Command extends WP_CLI_Command {
 		 */
 
 		if ( array_key_exists( 'product', $json_data ) ) {
-			// Add support: user should be able to import data exported from WP Dashboard (User Interface).
+			// Backward compatibility: user should be able to import data exported from WP Dashboard (User Interface).
 			// convert data to new format.
 			$temp_products = array();
 
@@ -202,7 +202,7 @@ class WC_Bookings_Helper_Products_Command extends WP_CLI_Command {
 			if ( ! empty( $json_data['global-availability-rules'] ) ) {
 				$global_availability_rules = wp_json_encode( $json_data['global-availability-rules'] );
 			} elseif ( array_key_exists( 'product', $json_data ) && array_key_exists( 'global_rules', $json_data ) ) {
-				// Add support: user should be able to import data exported from WP Dashboard (User Interface).
+				// Backward compatibility: user should be able to import data exported from WP Dashboard (User Interface).
 				// convert data to new format.
 				$global_availability_rules = $json_data['global_rules'];
 			} else {

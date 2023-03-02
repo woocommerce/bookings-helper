@@ -256,6 +256,7 @@ class WC_Bookings_Helper_Import extends WC_Bookings_Helper_Utils {
 
 		$product = json_decode( $product_json, true );
 
+		// Backward compatibility: user should be able to import zip generated from wp cli.
 		// Check if data has multiple booking products.
 		// At this moment we only support one product per file which imports from user interface.
 		// But we can import multiple products from wp cli.
