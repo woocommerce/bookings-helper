@@ -176,7 +176,6 @@ class WC_Bookings_Helper_Products_Command extends WP_CLI_Command {
 			$products = $json_data['booking-products'];
 		}
 
-
 		if ( empty( $products ) ) {
 			WP_CLI::error( 'Booking products import failed: File does not have data to import.' );
 

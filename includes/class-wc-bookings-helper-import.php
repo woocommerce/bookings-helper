@@ -177,7 +177,7 @@ class WC_Bookings_Helper_Import extends WC_Bookings_Helper_Utils {
 	 * @param string $global_rules_json Global availability rules in json format.
 	 *
 	 * @return void
-	 * @throw RuntimeException If the file is not in a valid JSON format.
+	 * @throws RuntimeException If the file is not in a valid JSON format.
 	 */
 	public function import_rules_from_json( string $global_rules_json ) {
 		if ( ! $this->is_json( $global_rules_json ) ) {
@@ -247,7 +247,8 @@ class WC_Bookings_Helper_Import extends WC_Bookings_Helper_Utils {
 	 * @param string $product_json Booking product data in json format.
 	 *
 	 * @return void
-	 * @throws RuntimeException|Exception Show error if something goes wrong.
+	 * @throws RuntimeException Show error if something goes wrong.
+	 * @throws Exception Show error if something goes wrong.
 	 */
 	public function import_product_from_json( string $product_json ) {
 		if ( ! $this->is_json( $product_json ) ) {
@@ -272,15 +273,19 @@ class WC_Bookings_Helper_Import extends WC_Bookings_Helper_Utils {
 				$object = $this;
 				$this->import_rules_from_json( wp_json_encode( $product['global-availability-rules'] ) );
 
-				add_action( 'admin_notices', function() use ( $object ) {
-					$object->wc_bookings_helper_prepare_notice(
-						esc_html__(
-							'Booking Product and Global rules imported successfully!',
-							'bookings-helper'
-						),
-						'success'
-					);
-				}, 9);
+				add_action(
+					'admin_notices',
+					function() use ( $object ) {
+						$object->wc_bookings_helper_prepare_notice(
+							esc_html__(
+								'Booking Product and Global rules imported successfully!',
+								'bookings-helper'
+							),
+							'success'
+						);
+					},
+					9
+				);
 			}
 
 			return;
