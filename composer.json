@@ -30,6 +30,7 @@
     ]
   },
   "require": {
-    "ext-zip": "*"
+    "ext-zip": "*",
+    "ext-json": "*"
   }
 }

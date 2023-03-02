@@ -91,10 +91,6 @@ class WC_Bookings_Helper_Import extends WC_Bookings_Helper_Utils {
 					} else {
 						$global_rules_json = file_get_contents( sanitize_text_field( wp_unslash( $_FILES['import']['tmp_name'] ) ) );  //phpcs:ignore
 					}
-
-					if ( ! $this->is_json( $global_rules_json ) ) {
-						throw new Exception( __( 'The file is not in a valid JSON format.', 'bookings-helper' ) );
-					}
 				}
 			} else {
 				$global_rules_json = $global_rules_form_product_zip;
@@ -180,8 +176,13 @@ class WC_Bookings_Helper_Import extends WC_Bookings_Helper_Utils {
 	 * @param string $global_rules_json Global availability rules in json format.
 	 *
 	 * @return void
+	 * @throw RuntimeException If the file is not in a valid JSON format.
 	 */
 	public function import_rules_from_json( string $global_rules_json ) {
+		if ( ! $this->is_json( $global_rules_json ) ) {
+			throw new RuntimeException( __( 'The file is not in a valid JSON format.', 'bookings-helper' ) );
+		}
+
 		$global_rules = json_decode( $global_rules_json, true );
 
 		// Sanitize.
@@ -245,11 +246,11 @@ class WC_Bookings_Helper_Import extends WC_Bookings_Helper_Utils {
 	 * @param string $product_json Booking product data in json format.
 	 *
 	 * @return void
-	 * @throws Exception Show error if something goes wrong.
+	 * @throws RuntimeException|Exception Show error if something goes wrong.
 	 */
 	public function import_product_from_json( string $product_json ) {
 		if ( ! $this->is_json( $product_json ) ) {
-			throw new Exception( __( 'The file is not in a valid JSON format.', 'bookings-helper' ) );
+			throw new RuntimeException( __( 'The file is not in a valid JSON format.', 'bookings-helper' ) );
 		}
 
 		$product = json_decode( $product_json, true );
