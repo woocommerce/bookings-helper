@@ -124,6 +124,9 @@ class WC_Bookings_Helper_Products_Command extends WP_CLI_Command {
 	 *
 	 * ## OPTIONS
 	 *
+	 * [--with-global-rules]
+	 * : Whether export global availability rules or not
+	 *
 	 * [--file=<absolute_path_to_zip_file>]
 	 * : The zip file path to import the booking global availability rules
 	 *
@@ -146,10 +149,14 @@ class WC_Bookings_Helper_Products_Command extends WP_CLI_Command {
 			return;
 		}
 
-		$file_path      = $assoc_args['file'];
-		$file_name      = basename( $assoc_args['file'], '.zip' );
-		$json_file_path = dirname( $file_path ) . '/' . $file_name . '.json';
-		$zip            = new ZipArchive();
+		$is_export_with_global_rules     = ! empty( $assoc_args['with-global-rules'] );
+		$file_path                       = $assoc_args['file'];
+		$file_name                       = basename( $assoc_args['file'], '.zip' );
+		$file_directory_path             = dirname( $file_path );
+		$booking_products_json_file_path = $file_directory_path . '/' . $file_name . '.json';
+		$global_rules_json_file_path     = null;
+
+		$zip = new ZipArchive();
 
 		if ( $zip->open( $assoc_args['file'] ) !== true ) {
 			WP_CLI::error( 'Booking products import failed. Please provide valid file path.' );
@@ -157,11 +164,36 @@ class WC_Bookings_Helper_Products_Command extends WP_CLI_Command {
 			return;
 		}
 
-		$zip->extractTo( dirname( $file_path ) );
+		// Reset file path If import command has --with-global-rules.
+		if ( $is_export_with_global_rules ) {
+			$file_directory_path             = dirname( $file_path ) . '/' . $file_name;
+			$booking_products_json_file_path = $file_directory_path . '/booking-products.json';
+			$global_rules_json_file_path     = $file_directory_path . '/global-availability-rules.json';
+		}
+
+		$zip->extractTo( $file_directory_path );
+
+		// Check if the zip file has global availability rules.
+		// If import command has --with-global-rules then throw error.
+		if (
+			$is_export_with_global_rules &&
+			! is_dir( dirname( $file_path ) . '/' . $file_name ) &&
+			! file_get_contents( dirname( $file_path ) . '/' . $file_name . '/global-availability-rules.json' ) // phpcs:ignore
+		) {
+			// Remove extracted file.
+			unlink( dirname( $file_path ) . "/$file_name.json" );
+
+			WP_CLI::error( 'Booking products import failed. Remove --with-global-rules from command because this zip does not have global availability rules.' );
+
+			return;
+		}
+
 		$zip->close();
 
-		$products = file_get_contents( $json_file_path ); // phpcs:ignore
-		unlink( $json_file_path );
+		/**
+		 * Import booking products.
+		 */
+		$products = file_get_contents( $booking_products_json_file_path ); // phpcs:ignore
 
 		if ( empty( $products ) ) {
 			WP_CLI::error( 'Booking products import failed. File does not have data to import.' );
@@ -185,6 +217,39 @@ class WC_Bookings_Helper_Products_Command extends WP_CLI_Command {
 			}
 		} catch ( Exception $e ) {
 			WP_CLI::error( 'Booking product import failed. Reason:' . $e->getMessage() );
+		}
+
+		/**
+		 * Import global availability rules.
+		 */
+		if ( $is_export_with_global_rules ) {
+			try {
+				$global_availability_rules = file_get_contents( $global_rules_json_file_path ); // phpcs:ignore
+
+				if ( empty( $global_availability_rules ) ) {
+					WP_CLI::error( 'Booking products import failed. File does not have global availability rules to import.' );
+
+					return;
+				}
+
+				( new WC_Bookings_Helper_Import() )->import_rules_from_json( $global_availability_rules );
+			} catch ( Exception $e ) {
+				WP_CLI::error( 'Booking product import failed. Reason:' . $e->getMessage() );
+			}
+		}
+
+		/**
+		 * Delete the extracted folder and file
+		 */
+		if ( $is_export_with_global_rules ) {
+			unlink( $booking_products_json_file_path );
+			unlink( $global_rules_json_file_path );
+
+			// Remove extracted folder.
+			// Directory will be removed only if it is empty.
+			rmdir( $file_directory_path );
+		} else {
+			unlink( $booking_products_json_file_path );
 		}
 
 		WP_CLI::success( 'Booking products imported successfully.' );
