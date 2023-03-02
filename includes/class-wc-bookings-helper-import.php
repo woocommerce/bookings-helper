@@ -147,9 +147,9 @@ class WC_Bookings_Helper_Import extends WC_Bookings_Helper_Utils {
 				}
 			}
 
-			$this->import_product_from_json( $product_json );
-
 			$success_message = __( 'Booking Product imported successfully!', 'bookings-helper' );
+
+			$this->import_product_from_json( $product_json );
 
 			// Import global rules.
 			if ( isset( $_POST['include_global_rules'] ) && ! empty( $product['global_rules'] ) ) {
@@ -158,6 +158,7 @@ class WC_Bookings_Helper_Import extends WC_Bookings_Helper_Utils {
 			}
 
 			$this->wc_bookings_helper_prepare_notice( esc_html( $success_message ), 'success' );
+
 			$this->clean_up();
 
 			return;
@@ -259,9 +260,26 @@ class WC_Bookings_Helper_Import extends WC_Bookings_Helper_Utils {
 		// At this moment we only support one product per file which imports from user interface.
 		// But we can import multiple products from wp cli.
 		// So we need to check if we have multiple products and import them one by one.
-		if ( ! isset( $product['product'] ) ) {
-			foreach ( $product as $product_data ) {
-				$this->import_product_from_json( $product_data );
+		if ( empty( $product['product'] ) && ! empty( $product['booking-products'] ) ) {
+			// Import booking products.
+			foreach ( $product['booking-products'] as $product_data ) {
+				$this->import_product_from_json( wp_json_encode( $product_data ) );
+			}
+
+			// Import global rules.
+			if ( isset( $_POST['include_global_rules'] ) && ! empty( $product['global-availability-rules'] ) ) {
+				$object = $this;
+				$this->import_rules_from_json( wp_json_encode( $product['global-availability-rules'] ) );
+
+				add_action( 'admin_notices', function() use ( $object ) {
+					$object->wc_bookings_helper_prepare_notice(
+						esc_html__(
+							'Booking Product and Global rules imported successfully!',
+							'bookings-helper'
+						),
+						'success'
+					);
+				}, 9);
 			}
 
 			return;
