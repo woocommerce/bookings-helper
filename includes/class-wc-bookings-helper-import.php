@@ -149,10 +149,6 @@ class WC_Bookings_Helper_Import extends WC_Bookings_Helper_Utils {
 				} else {
 					$product_json = file_get_contents( sanitize_text_field( wp_unslash( $_FILES['import']['tmp_name'] ) ) ); // phpcs:ignore
 				}
-
-				if ( ! $this->is_json( $product_json ) ) {
-					throw new Exception( __( 'The file is not in a valid JSON format.', 'bookings-helper' ) );
-				}
 			}
 
 			$this->import_product_from_json( $product_json );
@@ -252,6 +248,10 @@ class WC_Bookings_Helper_Import extends WC_Bookings_Helper_Utils {
 	 * @throws Exception Show error if something goes wrong.
 	 */
 	public function import_product_from_json( string $product_json ) {
+		if ( ! $this->is_json( $product_json ) ) {
+			throw new Exception( __( 'The file is not in a valid JSON format.', 'bookings-helper' ) );
+		}
+
 		$product = json_decode( $product_json, true );
 
 		// Check if data has multiple booking products.
