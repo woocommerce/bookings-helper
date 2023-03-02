@@ -65,19 +65,14 @@ class WC_Bookings_Helper_Products_Command extends WP_CLI_Command {
 
 		try {
 			$name_prefix = sprintf(
-				'booking-products-%s-%s',
+				'booking-products%s-%s-%s',
+				$is_export_with_global_rules ? '-with-global-rules' : '',
 				date( 'Y-m-d', current_time( 'timestamp' ) ), // phpcs:ignore
 				substr( wp_generate_password(), 0, 5 )
 			);
 
-			$zip_file_path  = $is_export_with_global_rules ?
-				str_replace(
-					'booking-products',
-					'booking-products-with-global-rules',
-					"$directory_path/$name_prefix.zip"
-				) :
-				"$directory_path/$name_prefix.zip";
-			$json_file_name = $is_export_with_global_rules ? 'booking-products.json' : "$name_prefix.json";
+			$zip_file_path  = "$directory_path/$name_prefix.zip";
+			$json_file_name = "$name_prefix.json";
 
 			// Create zip.
 			$zip = new ZipArchive();
@@ -88,22 +83,17 @@ class WC_Bookings_Helper_Products_Command extends WP_CLI_Command {
 				$product_ids = array_map( 'absint', explode( ',', $assoc_args['products'] ) );
 
 				foreach ( $product_ids as $product_id ) {
-					$booking_products_data[ $product_id ] = ( new WC_Bookings_Helper_Export() )->get_booking_product_data( $product_id );
+					$export_data['booking-products'][ $product_id ] = ( new WC_Bookings_Helper_Export() )->get_booking_product_data( $product_id );
 				}
-
-				$export_data = $booking_products_data;
 			} else {
-				$export_data = ( new WC_Bookings_Helper_Export() )->get_all_booking_products_data();
+				$export_data['booking-products'] = ( new WC_Bookings_Helper_Export() )->get_all_booking_products_data();
+			}
+
+			if ( $is_export_with_global_rules ) {
+				$export_data['global-availability-rules'] = ( new WC_Bookings_Helper_Export() )->get_global_availability_rules();
 			}
 
 			$zip->addFromString( $json_file_name, wp_json_encode( $export_data ) );
-
-			if ( $is_export_with_global_rules ) {
-				$zip->addFromString(
-					'global-availability-rules.json',
-					wp_json_encode( ( new WC_Bookings_Helper_Export() )->get_global_availability_rules() )
-				);
-			}
 
 			$zip->close();
 

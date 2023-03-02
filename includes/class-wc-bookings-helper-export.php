@@ -97,7 +97,7 @@ class WC_Bookings_Helper_Export extends WC_Bookings_Helper_Utils {
 				throw new Exception( __( 'This booking product does not exist!', 'bookings-helper' ) );
 			}
 
-			$prepared_json = $this->get_booking_product_data( $product_id );
+			$prepared_json = wp_json_encode( $this->get_booking_product_data( $product_id ) );
 
 			$this->trigger_download( $prepared_json, 'booking-product-' . $product_id );
 		} catch ( Exception $e ) {
@@ -118,7 +118,7 @@ class WC_Bookings_Helper_Export extends WC_Bookings_Helper_Utils {
 	 * @throws Exception If no product exists, show error.
 	 * @global WPDB $wpdb WordPress database object.
 	 */
-	public function get_booking_product_data( $product_id ): string {
+	public function get_booking_product_data( $product_id ): array {
 		global $wpdb;
 
 		// Products.
@@ -257,13 +257,11 @@ class WC_Bookings_Helper_Export extends WC_Bookings_Helper_Utils {
 			}
 		}
 
-		return wp_json_encode(
-			array(
-				'product'      => $product[0],
-				'product_meta' => $product_meta,
-				'resources'    => $prepared_resources,
-				'persons'      => $prepared_persons,
-			)
+		return array(
+			'product'      => $product[0],
+			'product_meta' => $product_meta,
+			'resources'    => $prepared_resources,
+			'persons'      => $prepared_persons,
 		);
 	}
 
