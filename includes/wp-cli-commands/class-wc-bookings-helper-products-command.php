@@ -79,12 +79,12 @@ class WC_Bookings_Helper_Products_Command extends WP_CLI_Command {
 					$booking_products_data[ $product_id ] = ( new WC_Bookings_Helper_Export() )->get_booking_product_data( $product_id );
 				}
 
-				$export_data = wp_json_encode( $booking_products_data );
+				$export_data = $booking_products_data;
 			} else {
 				$export_data = ( new WC_Bookings_Helper_Export() )->get_all_booking_products_data();
 			}
 
-			$zip->addFromString( $json_file_name, $export_data );
+			$zip->addFromString( $json_file_name, wp_json_encode($export_data) );
 
 			$zip->close();
 

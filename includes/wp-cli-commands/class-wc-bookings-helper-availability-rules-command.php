@@ -62,8 +62,7 @@ class WC_Bookings_Helper_Availability_Rules_Command extends WP_CLI_Command {
 
 			$zip->addFromString(
 				$json_file_name,
-				// Get json data for all booking products.
-				( new WC_Bookings_Helper_Export() )->get_global_availability_rules()
+				wp_json_encode(( new WC_Bookings_Helper_Export() )->get_global_availability_rules())
 			);
 
 			$zip->close();

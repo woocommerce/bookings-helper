@@ -70,7 +70,10 @@ class WC_Bookings_Helper_Export extends WC_Bookings_Helper_Utils {
 	 */
 	public function export_global_rules() {
 		try {
-			$this->trigger_download( $this->get_global_availability_rules(), 'bookings-global-rules' );
+			$this->trigger_download(
+				wp_json_encode( $this->get_global_availability_rules() ),
+				'bookings-global-rules'
+			);
 		} catch ( Exception $e ) {
 			$this->wc_bookings_helper_prepare_notice( $e->getMessage() );
 
@@ -271,7 +274,7 @@ class WC_Bookings_Helper_Export extends WC_Bookings_Helper_Utils {
 	 * @since 1.0.6
 	 * @throws Exception|RuntimeException If no booking products found, show error.
 	 */
-	public function get_all_booking_products_data(): string {
+	public function get_all_booking_products_data(): array {
 		global $wpdb;
 
 		$product_ids = $wpdb->get_col(
@@ -298,7 +301,7 @@ class WC_Bookings_Helper_Export extends WC_Bookings_Helper_Utils {
 			$booking_products_data[ $product_id ] = $this->get_booking_product_data( $product_id );
 		}
 
-		return wp_json_encode( $booking_products_data );
+		return $booking_products_data;
 	}
 
 	/**
@@ -310,7 +313,7 @@ class WC_Bookings_Helper_Export extends WC_Bookings_Helper_Utils {
 	 *
 	 * @throws Exception|RuntimeException When there are no rules to export.
 	 */
-	public function get_global_availability_rules(): string {
+	public function get_global_availability_rules(): array {
 		if ( version_compare( WC_BOOKINGS_VERSION, '1.13.0', '<' ) ) {
 			$global_rules = get_option( 'wc_global_booking_availability', array() );
 		} else {
@@ -321,7 +324,7 @@ class WC_Bookings_Helper_Export extends WC_Bookings_Helper_Utils {
 			throw new RuntimeException( __( 'There are no rules to export.', 'bookings-helper' ) );
 		}
 
-		return wp_json_encode( $global_rules );
+		return $global_rules;
 	}
 }
 
