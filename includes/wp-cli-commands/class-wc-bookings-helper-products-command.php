@@ -61,7 +61,7 @@ class WC_Bookings_Helper_Products_Command extends WP_CLI_Command {
 			$name_prefix = sprintf(
 				'booking-products-%s-%s',
 				date( 'Y-m-d', current_time( 'timestamp' ) ), // phpcs:ignore
-				substr( uniqid( '', false ), 0, 5 )
+				substr( wp_generate_password(), 0, 5 )
 			);
 
 			$zip_file_path  = "$directory_path/$name_prefix.zip";
