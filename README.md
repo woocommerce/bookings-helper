@@ -23,25 +23,25 @@ You can also use wp-cli to import/export bookable products and availability rule
 See the example below.
 ```bash
 # Export all products
-wp booking-helper export-product --all --dir=/absolute/path/to/directory/
+wp bookings-helper export-product --all --dir=/absolute/path/to/directory/
 
 # Export specific products
-wp booking-helper export-product --products="1,2" --dir=/absolute/path/to/directory/
+wp bookings-helper export-product --products="1,2" --dir=/absolute/path/to/directory/
 
 # Export all products with global availability rules
-wp booking-helper export-product --all --with-global-rules
+wp bookings-helper export-product --all --with-global-rules
 
 # Import all products
-wp booking-helper import-product --file=/absolute/path/to/file
+wp bookings-helper import-product --file=/absolute/path/to/file
 
 # Export global availability rules
-wp booking-helper export-availability-rules --dir=/absolute/path/to/directory/
+wp bookings-helper export-availability-rules --dir=/absolute/path/to/directory/
 
 # Import global availability rules
-wp booking-helper import-availability-rules --file=/absolute/path/to/directory/
+wp bookings-helper import-availability-rules --file=/absolute/path/to/directory/
 
 # Import all products with global availability rules
-wp booking-helper import-product --file=/absolute/path/to/file --with-global-rules
+wp bookings-helper import-product --file=/absolute/path/to/file --with-global-rules
 ```
 
 # Usage
