@@ -13,11 +13,11 @@ if ( ! class_exists( 'WP_CLI_Command' ) ) {
 }
 
 /**
- * Class WC_Bookings_Helper_Availability_Rules_Command
+ * Class WC_Bookings_Helper_Global_Availability_Rules_Command
  *
  * @since 1.0.6
  */
-class WC_Bookings_Helper_Availability_Rules_Command extends WP_CLI_Command {
+class WC_Bookings_Helper_Global_Availability_Rules_Command extends WP_CLI_Command {
 	/**
 	 * Export global availability rules.
 	 *

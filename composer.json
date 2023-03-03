@@ -21,7 +21,7 @@
   "autoload": {
     "files": [
       "includes/wp-cli-commands/class-wc-bookings-helper-products-command.php",
-      "includes/wp-cli-commands/class-wc-bookings-helper-availability-rules-command.php"
+      "includes/wp-cli-commands/class-wc-bookings-helper-global-availability-rules-command.php"
     ]
   },
   "archive": {

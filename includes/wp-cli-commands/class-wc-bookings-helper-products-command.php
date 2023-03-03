@@ -25,7 +25,7 @@ class WC_Bookings_Helper_Products_Command extends WP_CLI_Command {
 	 * [--all]
 	 * : Whether export all booking products or not
 	 *
-	 * [--with-global-rules]
+	 * [--with-global-availability-rules]
 	 * : Whether export global availability rules or not
 	 *
 	 * [--dir=<absolute_path_to_dir>]
@@ -38,7 +38,7 @@ class WC_Bookings_Helper_Products_Command extends WP_CLI_Command {
 	 * wp bookings-helper-products export --all
 	 * wp bookings-helper-products export --all --dir=/path/to/export
 	 * wp bookings-helper-products export --products="68,73"
-	 * wp bookings-helper-products export --all --with-global-rules
+	 * wp bookings-helper-products export --all --with-global-availability-rules
 	 *
 	 * @since 1.0.6
 	 *
@@ -61,12 +61,12 @@ class WC_Bookings_Helper_Products_Command extends WP_CLI_Command {
 			trailingslashit( WP_CONTENT_DIR ) . 'uploads' :
 			$assoc_args['dir'];
 
-		$is_exporting_with_global_rules = ! empty( $assoc_args['with-global-rules'] );
+		$is_exporting_with_global_rules = ! empty( $assoc_args['with-global-availability-rules'] );
 
 		// Create file name prefix on basis of export query.
 		$name_prefix = sprintf(
 			'booking-products%s-%s-%s',
-			$is_exporting_with_global_rules ? '-with-global-rules' : '',
+			$is_exporting_with_global_rules ? '-with-global-availability-rules' : '',
 			date( 'Y-m-d', current_time( 'timestamp' ) ), // phpcs:ignore
 			substr( wp_generate_password(), 0, 5 )
 		);
@@ -116,7 +116,7 @@ class WC_Bookings_Helper_Products_Command extends WP_CLI_Command {
 	 *
 	 * ## OPTIONS
 	 *
-	 * [--with-global-rules]
+	 * [--with-global-availability-rules]
 	 * : Whether export global availability rules or not
 	 *
 	 * [--file=<absolute_path_to_zip_file>]
@@ -141,7 +141,7 @@ class WC_Bookings_Helper_Products_Command extends WP_CLI_Command {
 			return;
 		}
 
-		$is_export_with_global_rules = ! empty( $assoc_args['with-global-rules'] );
+		$is_export_with_global_rules = ! empty( $assoc_args['with-global-availability-rules'] );
 		$file_path                   = $assoc_args['file'];
 		$file_name                   = basename( $assoc_args['file'], '.zip' );
 		$file_directory_path         = dirname( $file_path );
