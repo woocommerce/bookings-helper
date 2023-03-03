@@ -68,7 +68,7 @@ class WC_Bookings_Helper_Products_Command extends WP_CLI_Command {
 			'booking-products%s-%s-%s',
 			$is_exporting_with_global_rules ? '-with-global-availability-rules' : '',
 			date( 'Y-m-d', current_time( 'timestamp' ) ), // phpcs:ignore
-			substr( wp_generate_password(), 0, 5 )
+			time()
 		);
 
 		$zip_file_path  = "$directory_path/$name_prefix.zip";
