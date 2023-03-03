@@ -143,9 +143,7 @@ class WC_Bookings_Helper_Products_Command extends WP_CLI_Command {
 
 		$is_export_with_global_rules = ! empty( $assoc_args['with-global-availability-rules'] );
 		$file_path                   = $assoc_args['file'];
-		$file_name                   = basename( $assoc_args['file'], '.zip' );
 		$file_directory_path         = dirname( $file_path );
-		$json_file_path              = $file_directory_path . '/' . $file_name . '.json';
 
 		$zip = new ZipArchive();
 
@@ -156,6 +154,15 @@ class WC_Bookings_Helper_Products_Command extends WP_CLI_Command {
 		}
 
 		$zip->extractTo( $file_directory_path );
+
+		if( $zip->numFiles !== 1 ) {
+			WP_CLI::error( 'Booking products import failed: Invalid zip file. More than one file exists in the zip file.' );
+		}
+
+		// Get file name from extracted zip file.
+		$file_name      = $zip->getNameIndex( 0 );
+		$json_file_path = $file_directory_path . '/' . $file_name;
+
 		$zip->close();
 
 		$json_data = json_decode( file_get_contents( $json_file_path ), true ); // phpcs:ignore

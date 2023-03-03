@@ -105,10 +105,9 @@ class WC_Bookings_Helper_Global_Availability_Rules_Command extends WP_CLI_Comman
 			return;
 		}
 
-		$file_path      = $assoc_args['file'];
-		$file_name      = basename( $assoc_args['file'], '.zip' );
-		$json_file_path = dirname( $file_path ) . '/' . $file_name . '.json';
-		$zip            = new ZipArchive();
+		$file_path           = $assoc_args['file'];
+		$file_directory_path = dirname( $file_path );
+		$zip                 = new ZipArchive();
 
 		if ( true !== $zip->open( $assoc_args['file'] ) ) {
 			WP_CLI::error( 'Booking global availability rules import failed. Please provide valid file path.' );
@@ -117,6 +116,14 @@ class WC_Bookings_Helper_Global_Availability_Rules_Command extends WP_CLI_Comman
 		}
 
 		$zip->extractTo( dirname( $file_path ) );
+
+		if( $zip->numFiles !== 1 ) {
+			WP_CLI::error( 'Booking global availability rules import failed: Invalid zip file. More than one file exists in the zip file.' );
+		}
+
+		// Get file name from extracted zip file.
+		$file_name = $zip->getNameIndex(0);
+		$json_file_path = $file_directory_path . '/' . $file_name;
 
 		$availability_rules = file_get_contents( $json_file_path ); // phpcs:ignore
 		unlink( $json_file_path );
