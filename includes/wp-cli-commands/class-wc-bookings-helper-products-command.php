@@ -35,10 +35,10 @@ class WC_Bookings_Helper_Products_Command extends WP_CLI_Command {
 	 * : The booking product ids to export. ths product ids should be comma separated without spaces.
 	 *
 	 * ## EXAMPLES
-	 * wp booking-helper-products export --all
-	 * wp booking-helper-products export --all --dir=/path/to/export
-	 * wp booking-helper-products export --products="68,73"
-	 * wp booking-helper-products export --all --with-global-rules
+	 * wp bookings-helper-products export --all
+	 * wp bookings-helper-products export --all --dir=/path/to/export
+	 * wp bookings-helper-products export --products="68,73"
+	 * wp bookings-helper-products export --all --with-global-rules
 	 *
 	 * @since 1.0.6
 	 *
@@ -124,7 +124,7 @@ class WC_Bookings_Helper_Products_Command extends WP_CLI_Command {
 	 *
 	 *
 	 * ## EXAMPLES
-	 * wp booking-helper-products import --all --file=/path/to/absolute_path_to_zip_file
+	 * wp bookings-helper-products import --all --file=/path/to/absolute_path_to_zip_file
 	 *
 	 * @since 1.0.6
 	 *

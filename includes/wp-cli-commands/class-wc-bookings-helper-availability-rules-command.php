@@ -27,8 +27,8 @@ class WC_Bookings_Helper_Availability_Rules_Command extends WP_CLI_Command {
 	 * : The directory path to export the booking products
 	 *
 	 * ## EXAMPLES
-	 * wp booking-helper-availability-rules export
-	 * wp booking-helper-availability-rules export --dir=/path/to/export
+	 * wp bookings-helper-availability-rules export
+	 * wp bookings-helper-availability-rules export --dir=/path/to/export
 	 *
 	 * @since 1.0.6
 	 *
@@ -88,7 +88,7 @@ class WC_Bookings_Helper_Availability_Rules_Command extends WP_CLI_Command {
 	 * : The zip file path to import the booking global availability rules
 	 *
 	 * ## EXAMPLES
-	 * wp booking-helper-availability-rules import --file=/path/to/absolute_path_to_zip_file
+	 * wp bookings-helper-availability-rules import --file=/path/to/absolute_path_to_zip_file
 	 *
 	 * @since 1.0.6
 	 *
