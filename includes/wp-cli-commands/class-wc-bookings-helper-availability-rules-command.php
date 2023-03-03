@@ -110,7 +110,7 @@ class WC_Bookings_Helper_Availability_Rules_Command extends WP_CLI_Command {
 		$json_file_path = dirname( $file_path ) . '/' . $file_name . '.json';
 		$zip            = new ZipArchive();
 
-		if ( $zip->open( $assoc_args['file'] ) !== true ) {
+		if ( true !== $zip->open( $assoc_args['file'] ) ) {
 			WP_CLI::error( 'Booking global availability rules import failed. Please provide valid file path.' );
 
 			return;
