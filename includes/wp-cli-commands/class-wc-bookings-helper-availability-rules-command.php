@@ -67,7 +67,7 @@ class WC_Bookings_Helper_Availability_Rules_Command extends WP_CLI_Command {
 
 			$zip->close();
 
-			if ( $zip->open( $zip_file_path ) !== true ) {
+			if ( true !== $zip->open( $zip_file_path ) ) {
 				WP_CLI::error( 'Booking global availability rules export failed.' );
 
 				return;
