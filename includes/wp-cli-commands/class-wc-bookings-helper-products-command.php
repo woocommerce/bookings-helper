@@ -149,7 +149,7 @@ class WC_Bookings_Helper_Products_Command extends WP_CLI_Command {
 
 		$zip = new ZipArchive();
 
-		if ( $zip->open( $assoc_args['file'] ) !== true ) {
+		if ( true !== $zip->open( $assoc_args['file'] ) ) {
 			WP_CLI::error( 'Booking products import failed: Please provide valid file path.' );
 
 			return;
