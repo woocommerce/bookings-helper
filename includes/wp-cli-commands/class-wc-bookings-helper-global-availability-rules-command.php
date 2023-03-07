@@ -27,8 +27,8 @@ class WC_Bookings_Helper_Global_Availability_Rules_Command extends WP_CLI_Comman
 	 * : The directory path to export the booking products
 	 *
 	 * ## EXAMPLES
-	 * wp bookings-helper-availability-rules export
-	 * wp bookings-helper-availability-rules export --dir=/path/to/export
+	 * wp bookings-helper export-global-availability-rules
+	 * wp bookings-helper export-global-availability-rules --dir=/path/to/export
 	 *
 	 * @since 1.0.6
 	 *
