@@ -88,7 +88,7 @@ class WC_Bookings_Helper_Global_Availability_Rules_Command extends WP_CLI_Comman
 	 * : The zip file path to import the booking global availability rules
 	 *
 	 * ## EXAMPLES
-	 * wp bookings-helper-availability-rules import --file=/path/to/absolute_path_to_zip_file
+	 * wp bookings-helper import-global-availability-rules --file=/path/to/absolute_path_to_zip_file
 	 *
 	 * @since 1.0.6
 	 *
