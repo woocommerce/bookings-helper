@@ -59,7 +59,7 @@ class WC_Bookings_Helper_Products_Command extends WP_CLI_Command {
 		// Default path is wp-content/uploads.
 		$directory_path = empty( $assoc_args['dir'] ) ?
 			trailingslashit( WP_CONTENT_DIR ) . 'uploads' :
-			$assoc_args['dir'];
+			untrailingslashit( $assoc_args['dir'] );
 
 		$is_exporting_with_global_rules = ! empty( $assoc_args['with-global-availability-rules'] );
 

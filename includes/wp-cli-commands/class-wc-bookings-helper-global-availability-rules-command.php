@@ -42,7 +42,7 @@ class WC_Bookings_Helper_Global_Availability_Rules_Command extends WP_CLI_Comman
 		// Default path is wp-content/uploads.
 		$directory_path = empty( $assoc_args['dir'] ) ?
 			trailingslashit( WP_CONTENT_DIR ) . 'uploads' :
-			$assoc_args['dir'];
+			untrailingslashit( $assoc_args['dir'] );
 
 		try {
 			$name_prefix = 'booking-global-rules';
