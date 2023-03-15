@@ -19,6 +19,32 @@ You can export any specific bookable product and all of its settings including r
 
 If resources are defined, importing the bookable product will generate new resources that will be linked to the specific product you imported.
 
+You can also use wp-cli to import/export bookable products and availability rules.
+See the example below.
+```bash
+# Export all products
+wp bookings-helper export-products --all --dir=/absolute/path/to/directory/
+
+# Export specific products
+wp bookings-helper export-products --products="1,2" --dir=/absolute/path/to/directory/
+
+# Export all products with global availability rules
+wp bookings-helper export-products --all --with-global-rules
+
+# Import all products
+wp bookings-helper import-products --file=/absolute/path/to/file
+
+# Export global availability rules
+wp bookings-helper export-global-availability-rules --dir=/absolute/path/to/directory/
+
+# Import global availability rules
+wp bookings-helper import-global-availability-rules --file=/absolute/path/to/directory/
+
+# Import all products with global availability rules
+wp bookings-helper import-product --file=/absolute/path/to/file --with-global-rules
+```
+
 # Usage
 
 Just install the plugin and activate. Then go to "Tools->Bookings Helper".
+

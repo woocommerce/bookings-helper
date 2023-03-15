@@ -5,7 +5,8 @@
   "type": "wordpress-plugin",
   "license": "GPL-2.0+",
   "require-dev": {
-    "woocommerce/woocommerce-sniffs": "^0.1.3"
+    "woocommerce/woocommerce-sniffs": "^0.1.3",
+    "php-stubs/wp-cli-stubs": "^2.7"
   },
   "config": {
     "platform": {
@@ -16,5 +17,20 @@
       "automattic/jetpack-autoloader": true,
       "dealerdirect/phpcodesniffer-composer-installer": true
     }
+  },
+  "autoload": {
+    "files": [
+      "includes/wp-cli-commands/class-wc-bookings-helper-products-command.php",
+      "includes/wp-cli-commands/class-wc-bookings-helper-global-availability-rules-command.php"
+    ]
+  },
+  "archive": {
+    "exclude": [
+      "!vendor"
+    ]
+  },
+  "require": {
+    "ext-zip": "*",
+    "ext-json": "*"
   }
 }

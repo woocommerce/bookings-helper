@@ -1,4 +1,4 @@
-<?php
+<?php // phpcs:disable WooCommerce.Commenting.CommentTags.AuthorTag,WordPress.Files.FileName.InvalidClassFileName
 /**
  * Plugin Name: Bookings Helper
  * Version: 1.0.5
@@ -93,6 +93,8 @@ if ( ! class_exists( 'Bookings_Helper' ) ) {
 	}
 }
 
+require_once 'vendor/autoload.php';
+
 /**
  * WooCommerce fallback notice.
  *
@@ -100,7 +102,7 @@ if ( ! class_exists( 'Bookings_Helper' ) ) {
  */
 function woocommerce_bookings_helper_missing_wc_notice() {
 	/* translators: %s WC download URL link. */
-	echo '<div class="error"><p><strong>' . sprintf( esc_html__( 'Bookings Helper plugin requires WooCommerce to be installed and active. You can download %s here.', 'woocommerce-bookings' ), '<a href="https://woocommerce.com/" target="_blank">WooCommerce</a>' ) . '</strong></p></div>';
+	echo '<div class="error"><p><strong>' . sprintf( esc_html__( 'Bookings Helper plugin requires WooCommerce to be installed and active. You can download %s here.', 'bookings-helper' ), '<a href="https://woocommerce.com/" target="_blank">WooCommerce</a>' ) . '</strong></p></div>';
 }
 
 /**
@@ -110,7 +112,7 @@ function woocommerce_bookings_helper_missing_wc_notice() {
  */
 function woocommerce_bookings_helper_missing_bookings_notice() {
 	/* translators: %s WC download URL link. */
-	echo '<div class="error"><p><strong>' . sprintf( esc_html__( 'Bookings Helper plugin requires WooCommerce Bookings to be installed and active. You can download %s here.', 'woocommerce-bookings' ), '<a href="https://woocommerce.com/products/woocommerce-bookings/" target="_blank">WooCommerce Bookings</a>' ) . '</strong></p></div>';
+	echo '<div class="error"><p><strong>' . sprintf( esc_html__( 'Bookings Helper plugin requires WooCommerce Bookings to be installed and active. You can download %s here.', 'bookings-helper' ), '<a href="https://woocommerce.com/products/woocommerce-bookings/" target="_blank">WooCommerce Bookings</a>' ) . '</strong></p></div>';
 }
 
 /**
@@ -135,3 +137,12 @@ function woocommerce_bookings_helper_init() {
 }
 
 add_action( 'plugins_loaded', 'woocommerce_bookings_helper_init', 10 );
+
+// Register WP CLI command.
+if ( defined( 'WP_CLI' ) && WP_CLI ) {
+	WP_CLI::add_command( 'bookings-helper export-products', array( 'WC_Bookings_Helper_Products_Command', 'export' ) );
+	WP_CLI::add_command( 'bookings-helper import-products', array( 'WC_Bookings_Helper_Products_Command', 'import' ) );
+	WP_CLI::add_command( 'bookings-helper export-global-availability-rules', array( 'WC_Bookings_Helper_Global_Availability_Rules_Command', 'export' ) );
+	WP_CLI::add_command( 'bookings-helper import-global-availability-rules', array( 'WC_Bookings_Helper_Global_Availability_Rules_Command', 'import' ) );
+}
+
