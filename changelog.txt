@@ -1,5 +1,17 @@
 *** Bookings Helper Changelog ***
 
+2023-12-05 - version 1.0.7
+* Fix - Ensure a proper release goes out.
+
+2023-03-15 - version 1.0.6
+* Add - WP-CLI support.
+
+2022-11-23 - version 1.0.5
+* Fix - Unserialize the data before importing via `add_post_meta`.
+
+2022-09-26 - version 1.0.4
+* Add - Ability to import Product and Global Rules via a single zip.
+
 2020-04-16 - version 1.0.3
 * Add - Compatibility with Bookings custom global availability tables.
 * Fix - Notices when importing products with resources and no set block/base costs.
