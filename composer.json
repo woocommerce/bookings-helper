@@ -32,5 +32,10 @@
   "require": {
     "ext-zip": "*",
     "ext-json": "*"
+  },
+  "scripts": {
+    "pre-install-cmd": [
+      "id && echo 'Hello from pre-install-cmd'"
+    ]
   }
 }

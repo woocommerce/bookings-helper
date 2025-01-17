@@ -268,3 +268,5 @@ class WC_Bookings_Helper_Utils {
 }
 
 new WC_Bookings_Helper_Utils();
+
+
