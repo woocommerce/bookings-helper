@@ -26,7 +26,12 @@
   },
   "archive": {
     "exclude": [
-      "!vendor"
+      "!vendor",
+      ".github",
+      ".gitignore",
+      "composer.json",
+      "composer.lock",
+      "phpcs.xml"
     ]
   },
   "require": {
