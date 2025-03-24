@@ -93,7 +93,18 @@ if ( ! class_exists( 'Bookings_Helper' ) ) {
 	}
 }
 
-require_once 'vendor/autoload.php';
+// Require the autoloader if it exists.
+if ( file_exists( plugin_dir_path( __FILE__ ) . '/vendor/autoload.php' ) ) {
+	require_once plugin_dir_path( __FILE__ ) . '/vendor/autoload.php';
+} else {
+	add_action( 'admin_notices', function () {
+		?>
+		<div class="notice notice-error">
+			<p><?php esc_html_e( 'Please run "composer install" in the "Bookings Helper" plugin directory.', 'bookings-helper' ); ?></p>
+		</div>
+		<?php
+	} );
+}
 
 /**
  * WooCommerce fallback notice.
