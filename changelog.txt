@@ -1,5 +1,10 @@
 *** Bookings Helper Changelog ***
 
+2025-03-31 - version 1.0.8
+* Fix - Prevent a fatal error when the `vendor` directory is missing.
+* Dev - Add GitHub Action to generate and upload a ZIP file to the release.
+* Dev - Fix typos in the README file.
+
 2023-12-05 - version 1.0.7
 * Fix - Ensure a proper release goes out.
 
