@@ -11,7 +11,7 @@ jobs:
     name: Add issue to project
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/add-to-project@v0.4.0
+      - uses: actions/add-to-project@960fbad431afda394cfcf8743445e741acd19e85 # v0.4.0
         with:
           project-url: https://github.com/orgs/woocommerce/projects/73
           github-token: ${{ secrets.ADD_TO_PROJECT_PAT }}

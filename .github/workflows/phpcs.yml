@@ -10,21 +10,25 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
       - id: changed-files
-        uses: tj-actions/changed-files@v19
+        uses: tj-actions/changed-files@a6d456f542692915c5289ea834fb89bc07c11208 # v19
         with:
           files: |
             **/*.php
+
       - name: Set PHP version
-        uses: shivammathur/setup-php@v2
+        uses: shivammathur/setup-php@27853eb8b46dc01c33bf9fef67d98df2683c3be2 #v2
         with:
           php-version: 7.0
           tools: composer:v2
           coverage: none
+
       - name: Install dependencies
         if: ${{ steps.changed-files.outputs.any_changed == 'true' }}
         run: composer install
+
       - name: Test
         if: ${{ steps.changed-files.outputs.any_changed == 'true' }}
         run: ./vendor/bin/phpcs ${{ steps.changed-files.outputs.all_changed_files }}
