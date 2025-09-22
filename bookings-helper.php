@@ -1,7 +1,7 @@
 <?php // phpcs:disable WooCommerce.Commenting.CommentTags.AuthorTag,WordPress.Files.FileName.InvalidClassFileName
 /**
  * Plugin Name: Bookings Helper
- * Version: 1.0.8
+ * Version: 1.0.9
  * Plugin URI: https://github.com/woocommerce/bookings-helper
  * Description: This extension is a WooCommerce Bookings helper which helps you to troubleshoot bookings setup easier by allowing you to quickly export/import product settings.
  * Author: WooCommerce
@@ -27,7 +27,7 @@ if ( ! defined( 'WC_BOOKINGS_ABSPATH' ) ) {
 
 if ( ! class_exists( 'Bookings_Helper' ) ) {
 
-	define( 'WC_BOOKINGS_HELPER_VERSION', '1.0.8' );
+	define( 'WC_BOOKINGS_HELPER_VERSION', '1.0.9' );
 	define( 'WC_BOOKINGS_HELPER_TEMPLATE_PATH', untrailingslashit( plugin_dir_path( __FILE__ ) ) . '/templates/' );
 	define( 'WC_BOOKINGS_HELPER_PLUGIN_URL', untrailingslashit( plugins_url( '/', __FILE__ ) ) );
 	define( 'WC_BOOKINGS_HELPER_PLUGIN_PATH', untrailingslashit( plugin_dir_path( __FILE__ ) ) );
@@ -50,6 +50,9 @@ if ( ! class_exists( 'Bookings_Helper' ) ) {
 		public function __construct() {
 			$this->includes();
 			$this->init();
+			
+			// Declare compatibility with High-Performance Order Storage.
+			add_action( 'before_woocommerce_init', array( $this, 'declare_hpos_compatibility' ) );
 		}
 
 		/**
@@ -89,6 +92,17 @@ if ( ! class_exists( 'Bookings_Helper' ) ) {
 		 */
 		public function tool_page() {
 			include_once WC_BOOKINGS_HELPER_ABSPATH . 'templates/tool-page.php';
+		}
+
+		/**
+		 * Declare compatibility with High-Performance Order Storage.
+		 *
+		 * @since 1.0.9
+		 */
+		public function declare_hpos_compatibility() {
+			if ( class_exists( '\Automattic\WooCommerce\Utilities\FeaturesUtil' ) ) {
+				\Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility( 'custom_order_tables', WC_BOOKINGS_HELPER_MAIN_FILE, true );
+			}
 		}
 	}
 }
