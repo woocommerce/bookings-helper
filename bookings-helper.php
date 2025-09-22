@@ -50,7 +50,7 @@ if ( ! class_exists( 'Bookings_Helper' ) ) {
 		public function __construct() {
 			$this->includes();
 			$this->init();
-			
+
 			// Declare compatibility with High-Performance Order Storage.
 			add_action( 'before_woocommerce_init', array( $this, 'declare_hpos_compatibility' ) );
 		}
