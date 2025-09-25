@@ -97,7 +97,7 @@ if ( ! class_exists( 'Bookings_Helper' ) ) {
 		/**
 		 * Declare compatibility with High-Performance Order Storage.
 		 *
-		 * @since 1.0.9
+		 * @since x.x.x
 		 */
 		public function declare_hpos_compatibility() {
 			if ( class_exists( '\Automattic\WooCommerce\Utilities\FeaturesUtil' ) ) {
