@@ -1,7 +1,7 @@
 <?php // phpcs:disable WooCommerce.Commenting.CommentTags.AuthorTag,WordPress.Files.FileName.InvalidClassFileName
 /**
  * Plugin Name: Bookings Helper
- * Version: 1.0.8
+ * Version: 1.0.9
  * Plugin URI: https://github.com/woocommerce/bookings-helper
  * Description: This extension is a WooCommerce Bookings helper which helps you to troubleshoot bookings setup easier by allowing you to quickly export/import product settings.
  * Author: WooCommerce
@@ -27,7 +27,7 @@ if ( ! defined( 'WC_BOOKINGS_ABSPATH' ) ) {
 
 if ( ! class_exists( 'Bookings_Helper' ) ) {
 
-	define( 'WC_BOOKINGS_HELPER_VERSION', '1.0.8' );
+	define( 'WC_BOOKINGS_HELPER_VERSION', '1.0.9' );
 	define( 'WC_BOOKINGS_HELPER_TEMPLATE_PATH', untrailingslashit( plugin_dir_path( __FILE__ ) ) . '/templates/' );
 	define( 'WC_BOOKINGS_HELPER_PLUGIN_URL', untrailingslashit( plugins_url( '/', __FILE__ ) ) );
 	define( 'WC_BOOKINGS_HELPER_PLUGIN_PATH', untrailingslashit( plugin_dir_path( __FILE__ ) ) );
