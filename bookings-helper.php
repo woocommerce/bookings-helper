@@ -50,6 +50,9 @@ if ( ! class_exists( 'Bookings_Helper' ) ) {
 		public function __construct() {
 			$this->includes();
 			$this->init();
+
+			// Declare compatibility with High-Performance Order Storage.
+			add_action( 'before_woocommerce_init', array( $this, 'declare_hpos_compatibility' ) );
 		}
 
 		/**
@@ -89,6 +92,17 @@ if ( ! class_exists( 'Bookings_Helper' ) ) {
 		 */
 		public function tool_page() {
 			include_once WC_BOOKINGS_HELPER_ABSPATH . 'templates/tool-page.php';
+		}
+
+		/**
+		 * Declare compatibility with High-Performance Order Storage.
+		 *
+		 * @since x.x.x
+		 */
+		public function declare_hpos_compatibility() {
+			if ( class_exists( '\Automattic\WooCommerce\Utilities\FeaturesUtil' ) ) {
+				\Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility( 'custom_order_tables', WC_BOOKINGS_HELPER_MAIN_FILE, true );
+			}
 		}
 	}
 }
