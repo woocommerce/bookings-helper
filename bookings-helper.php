@@ -10,6 +10,7 @@
  * Domain Path: /languages
  * Tested up to: 6.0.1
  * Requires at least: 5.6
+ * Requires PHP: 7.4
  * WC tested up to: 6.3
  * WC requires at least: 6.0
  *
@@ -21,8 +22,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+if ( ! is_php_version_compatible( '7.4' ) ) {
+	return;
+}
+
 if ( ! defined( 'WC_BOOKINGS_ABSPATH' ) ) {
-	define( 'WC_BOOKINGS_HELPER_ABSPATH', dirname( __FILE__ ) . '/' );
+	define( 'WC_BOOKINGS_HELPER_ABSPATH', __DIR__ . '/' );
 }
 
 if ( ! class_exists( 'Bookings_Helper' ) ) {
@@ -147,7 +152,7 @@ function woocommerce_bookings_helper_missing_bookings_notice() {
  * Init function for the language directory.
  */
 function woocommerce_bookings_helper_init() {
-	load_plugin_textdomain( 'bookings-helper', false, plugin_basename( dirname( __FILE__ ) ) . '/languages' );
+	load_plugin_textdomain( 'bookings-helper', false, plugin_basename( __DIR__ ) . '/languages' );
 
 	if ( ! class_exists( 'WooCommerce' ) ) {
 		add_action( 'admin_notices', 'woocommerce_bookings_helper_missing_wc_notice' );
