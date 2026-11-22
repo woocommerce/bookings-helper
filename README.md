@@ -7,7 +7,7 @@ All exports will be in zipped JSON file format.
 
 * WordPress 5.6
 * WooCommerce 6.0
-* PHP 7.0
+* PHP 7.4
 
 # Global Availability Rules
 
